@@ -2,42 +2,33 @@ require("dotenv").config();
 
 const express = require("express");
 const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs");
 const path = require("path");
+const session = require("express-session");
+const MongoStore = require("connect-mongo");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ---------- MIDDLEWARE ----------
-const session = require('express-session');
-const MongoStore = require('connect-mongo'); // if using MongoDB store
-
-app.set('trust proxy', 1); // for Render/Heroku if behind proxy
+app.set("trust proxy", 1); // For Render/Heroku HTTPS
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'defaultsecret', // <- MUST have a secret
+  secret: process.env.SESSION_SECRET, // MUST be set on Render
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
-  cookie: { secure: process.env.NODE_ENV === 'production' } // only send cookies over HTTPS in prod
+  cookie: { secure: process.env.NODE_ENV === "production", maxAge: 1000 * 60 * 60 * 24 } // 1 day
 }));
 
-
-
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-
-// ✅ Serve static files from frontend folder
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "frontend")));
 
-// ---------- DATABASE CONNECTION ----------
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+// ---------- DATABASE ----------
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+  .catch(err => console.error("❌ MongoDB connection error:", err));
 
 // ---------- USER MODEL ----------
 const favoriteSchema = new mongoose.Schema({
@@ -52,267 +43,127 @@ const User = mongoose.model("User", new mongoose.Schema({
   name: String,
   mobile: String,
   password: String,
-  cart: [
-    {
-      productId: String,
-      name: String,
-      qty: Number,
-      price: Number,
-      image: String,
-      desc: String,
-    }
-  ],
+  cart: [{ productId: String, name: String, qty: Number, price: Number, image: String, desc: String }],
   favorites: { type: [favoriteSchema], default: [] }
 }));
 
-// ---------------- SIGNUP ----------------
-app.post("/signup", async (req, res) => {
+// ---------- SIGNUP ----------
+app.post("/api/auth/signup", async (req, res) => {
   try {
     const { name, mobile, password } = req.body;
-
     const existingUser = await User.findOne({ mobile });
-    if (existingUser) {
-      return res.json({ success: false, message: "User already exists!" });
-    }
+    if (existingUser) return res.status(400).json({ message: "User already exists!" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const newUser = new User({ name, mobile, password: hashedPassword });
     await newUser.save();
 
     res.json({ success: true, message: "Signup successful!" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-// ---------------- SIGNIN ----------------
+// ---------- SIGNIN ----------
 app.post("/api/auth/signin", async (req, res) => {
   try {
     const { mobile, password } = req.body;
-
     const user = await User.findOne({ mobile });
-    if (!user) {
-      return res.status(400).json({ message: "User not found" });
-    }
+    if (!user) return res.status(400).json({ message: "User not found" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
+    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
     req.session.userId = user._id;
 
-    res.json({
-      message: "Login successful!",
-      user: { name: user.name, mobile: user.mobile }
-    });
+    res.json({ success: true, message: "Login successful!", user: { name: user.name, mobile: user.mobile } });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// ---------------- GET PROFILE ----------------
+// ---------- GET PROFILE ----------
 app.get("/api/auth/profile", async (req, res) => {
   try {
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Not logged in" });
-    }
-
+    if (!req.session.userId) return res.status(401).json({ message: "Not logged in" });
     const user = await User.findById(req.session.userId).select("-password");
     if (!user) return res.status(404).json({ message: "User not found" });
-
     res.json({ user });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// ---------------- UPDATE PROFILE ----------------
+// ---------- UPDATE PROFILE ----------
 app.put("/api/auth/profile/update", async (req, res) => {
   try {
-    const { mobile, name, password } = req.body;
-    let updateData = { name };
+    if (!req.session.userId) return res.status(401).json({ message: "Not logged in" });
+    const { name, password } = req.body;
+    const updateData = { name };
 
     if (password && password.trim() !== "") {
-      const salt = await bcrypt.genSalt(10);
-      updateData.password = await bcrypt.hash(password, salt);
+      updateData.password = await bcrypt.hash(password, 10);
     }
 
-    const user = await User.findOneAndUpdate(
-      { mobile },
-      { $set: updateData },
-      { new: true }
-    ).select("-password");
-
+    const user = await User.findByIdAndUpdate(req.session.userId, updateData, { new: true }).select("-password");
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    res.json({ message: "Profile updated", user });
+    res.json({ success: true, message: "Profile updated", user });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// ---------------- CART ROUTES ----------------
+// ---------- CART ----------
 app.get("/api/cart", async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ message: "Not logged in" });
-
-  try {
-    const user = await User.findById(req.session.userId);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    res.json({ items: user.cart || [] });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
-  }
+  const user = await User.findById(req.session.userId);
+  res.json({ items: user?.cart || [] });
 });
 
 app.post("/api/cart", async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ message: "Not logged in" });
+  const { productId, name, qty, price, image, desc } = req.body;
+  if (!productId || !name || !qty) return res.status(400).json({ message: "Invalid cart data" });
 
-  try {
-    const { productId, name, qty, price, image, desc } = req.body;
-    if (!productId || !name || !qty) return res.status(400).json({ message: "Invalid cart data" });
+  const user = await User.findById(req.session.userId);
+  const item = user.cart.find(i => i.productId === productId);
+  if (item) item.qty += qty;
+  else user.cart.push({ productId, name, qty, price, image, desc });
 
-    const user = await User.findById(req.session.userId);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const item = user.cart.find(i => i.productId === productId);
-    if (item) {
-      item.qty += qty;
-    } else {
-      user.cart.push({ productId, name, qty, price, image, desc });
-    }
-
-    await user.save();
-    res.json({ success: true, cart: user.cart });
-  } catch (err) {
-    console.error("❌ Cart error:", err.message);
-    res.status(500).json({ message: "Server error", error: err.message });
-  }
+  await user.save();
+  res.json({ success: true, cart: user.cart });
 });
 
-app.put("/api/cart", async (req, res) => {
-  try {
-    if (!req.session.userId) return res.status(401).json({ message: "Not logged in" });
-
-    const { productId, qty } = req.body;
-    const user = await User.findById(req.session.userId);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const itemIndex = user.cart.findIndex(i => i.productId === productId);
-    if (itemIndex === -1) return res.status(404).json({ message: "Item not in cart" });
-
-    if (qty <= 0) user.cart.splice(itemIndex, 1);
-    else user.cart[itemIndex].qty = qty;
-
-    await user.save();
-    res.json({ success: true, cart: user.cart });
-  } catch (err) {
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-app.delete("/api/cart", async (req, res) => {
-  try {
-    if (!req.session.userId) return res.status(401).json({ message: "Not logged in" });
-
-    const { productId } = req.body;
-    if (!productId) return res.status(400).json({ message: "Product ID required" });
-
-    const user = await User.findById(req.session.userId);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    user.cart = user.cart.filter(item => item.productId !== productId);
-    await user.save();
-    res.json({ success: true, cart: user.cart });
-  } catch (err) {
-    console.error("❌ Remove error:", err.message);
-    res.status(500).json({ message: "Server error", error: err.message });
-  }
-});
-
-// ---------------- FAVORITES ROUTES ----------------
-
-// Get user favorites
+// ---------- FAVORITES ----------
 app.get("/api/favorites", async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ message: "Not logged in" });
-
-  try {
-    const user = await User.findById(req.session.userId);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    res.json({ items: user.favorites || [] });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
-  }
+  const user = await User.findById(req.session.userId);
+  res.json({ items: user?.favorites || [] });
 });
 
-// Add to favorites
 app.post("/api/favorites", async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ message: "Not logged in" });
-
-  try {
-    const { productId, name, price, image, desc } = req.body;
-    if (!productId) return res.status(400).json({ message: "Product ID required" });
-
-    const user = await User.findById(req.session.userId);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    // Avoid duplicates
-    if (!user.favorites.some(fav => fav.productId === productId)) {
-      user.favorites.push({ productId, name, price, image, desc });
-      await user.save();
-    }
-
-    res.json({ success: true, message: "Added to favorites" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-});
-
-// Remove from favorites
-app.delete("/api/favorites", async (req, res) => {
-  if (!req.session.userId) return res.status(401).json({ message: "Not logged in" });
-
-  try {
-    const { productId } = req.body;
-    if (!productId) return res.status(400).json({ message: "Product ID required" });
-
-    const user = await User.findById(req.session.userId);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    user.favorites = user.favorites.filter(fav => fav.productId !== productId);
+  const { productId, name, price, image, desc } = req.body;
+  const user = await User.findById(req.session.userId);
+  if (!user.favorites.some(f => f.productId === productId)) {
+    user.favorites.push({ productId, name, price, image, desc });
     await user.save();
-
-    res.json({ success: true, message: "Removed from favorites" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: "Server error" });
   }
+  res.json({ success: true });
 });
 
-// -------------------- LOGOUT ROUTE --------------------
+// ---------- LOGOUT ----------
 app.get("/logout", (req, res) => {
-  try {
-    req.session.destroy(err => {
-      if (err) {
-        console.error("Logout error:", err);
-        return res.status(500).json({ success: false, message: "Logout failed" });
-      }
-      res.clearCookie("connect.sid");
-      res.json({ success: true, message: "Logged out successfully" });
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
+  req.session.destroy(err => {
+    if (err) return res.status(500).json({ message: "Logout failed" });
+    res.clearCookie("connect.sid");
+    res.json({ success: true, message: "Logged out" });
+  });
 });
 
 // ---------- DEFAULT ROUTE ----------
@@ -322,5 +173,5 @@ app.get("/", (req, res) => {
 
 // ---------- START SERVER ----------
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
