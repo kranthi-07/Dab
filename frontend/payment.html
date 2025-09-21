@@ -1,0 +1,222 @@
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lora:ital,wght@0,400..700;1,400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        header {
+            position: fixed;
+            height: 60px;
+            box-shadow: 0px 5px 10px lightgray;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #ea580c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        header .back {
+            background-color: #fff;
+            color: #ea580c;
+            position: absolute;
+            left: 0;
+            font-size: 20px;
+            margin-left: 20px;
+            display: flex;
+            cursor:pointer;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50px;
+            padding: 3px;
+        }
+
+        header h3 {
+            color: #fff;
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        }
+
+
+        .amount {
+            margin: 90px 20px 20px 20px;
+            background-color:#ffc09e55;
+            display: flex;
+            box-shadow: 0 0 10px rgb(234, 234, 234);
+            align-items: center;
+            justify-content: center;
+            height: 100px;
+            flex-direction: column;
+            border-radius: 15px;
+        }
+
+        .amount h3 {
+            padding: 10px;
+        }
+
+
+        .total{
+            color:#ea580c;
+            font-weight: bold;
+        }
+
+        .upi {
+            margin: 20px;
+            display: flex;
+            padding: 10px 5px;
+            box-shadow: 0 0 20px rgb(234, 234, 234);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            border-radius: 15px;
+        }
+
+
+        .upi h3 {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 10px;
+            color:#ea580c;
+
+        }
+
+
+        .upi div {
+            background-color: whitesmoke;
+            width: 96%;
+            display: flex;
+            border-radius: 10px;
+            align-items: center;
+            justify-content: space-between;
+            margin: 5px;
+            padding: 20px 30px;
+            cursor: pointer;
+
+        }
+
+
+        .cod {
+            margin: 20px;
+            display: flex;
+            padding: 10px 5px;
+            box-shadow: 0 0 20px rgb(234, 234, 234);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            border-radius: 15px;
+        }
+
+        .cod p {
+            width: 96%;
+            display: flex;
+            justify-content: space-between;
+            background-color: whitesmoke;
+            padding: 20px 30px;
+            border-radius: 10px;
+            margin: 5px;
+            cursor: pointer;
+        }
+
+        .cod h3 {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 10px;
+            color: #ea580c;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="back" onclick="back()">
+            <i class="ri-arrow-left-s-fill"></i>
+        </div>
+
+        <h3>DAB DAB</h3>
+    </header>
+
+    <div class="amount">
+        <h3>Payment Page</h3>
+        <div class="total">
+            Total : 0
+        </div>
+    </div>
+
+
+    <div class="upi">
+        <h3>UPI Apps</h3>
+
+
+        <div class="phonepay">
+            <p>Phonepay</p>
+            <i class="ri-arrow-right-s-line"></i>
+        </div>
+
+        <div class="googlepay">
+            <p>Googlepay</p>
+            <i class="ri-arrow-right-s-line"></i>
+        </div>
+        <div class="paytm">
+            <p>Paytm</p>
+            <i class="ri-arrow-right-s-line"></i>
+        </div>
+    </div>
+
+
+    <div class="cod">
+        <h3>Cash on delivery</h3>
+        <p>Cash on Delivery<i class="ri-arrow-right-s-line"></i></p>
+    </div>
+
+</body>
+
+<script>
+    function back() {
+        window.location.replace("cart.html");
+    }
+
+    async function loadTotal() {
+        try {
+            const res = await fetch("/api/cart", { credentials: "include" });
+            if (res.status === 401) {
+                document.querySelector(".total").textContent = "Total : ₹0";
+                return;
+            }
+
+            const data = await res.json();
+            if (data.items) {
+                let subtotal = 0;
+                data.items.forEach(item => {
+                    const price = Number(item.price) || 0;
+                    const qty = Number(item.qty) || 1;
+                    subtotal += price * qty;
+                });
+
+                document.querySelector(".total").textContent = "Total : ₹" + subtotal;
+            }
+        } catch (err) {
+            console.error("Error fetching cart:", err);
+            document.querySelector(".total").textContent = "Total : ₹0";
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadTotal);
+
+    function back() {
+        window.location.replace("cart.html");
+    }
+</script>
+
+
+</html>

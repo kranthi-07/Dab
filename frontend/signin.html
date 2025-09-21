@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Sign In - Dab Dab</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #fff7ed;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      padding: 1rem;
+    }
+
+    .signin-container {
+      background: #ffffff;
+      padding: 2.5rem 2rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+      width: 100%;
+      max-width: 460px;
+      text-align: center;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h2 {
+      font-family: 'Lora', serif;
+      font-size: 2rem;
+      color: #0f172a;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: #475569;
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+    }
+
+    .input-group {
+      text-align: left;
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      color: #334155;
+      margin-bottom: 0.4rem;
+    }
+
+    .mobile-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+    }
+
+    .country-display {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 1rem;
+      color: #475569;
+      user-select: none;
+    }
+
+    .country-display span {
+      font-size: 1.3rem;
+    }
+
+    input[type="tel"] {
+      border: none;
+      font-size: 1rem;
+      width: 100%;
+      background: transparent;
+      outline: none;
+      color: #0f172a;
+    }
+
+    .password-wrapper {
+      position: relative;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+    }
+
+    .password-wrapper input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+      color: #0f172a;
+    }
+
+    .password-wrapper input:focus {
+      outline: none;
+      border: none;
+      box-shadow: none;
+    }
+
+    .toggle-password {
+      font-size: 1.2rem;
+      color: #64748b;
+      cursor: pointer;
+      transition: transform 0.25s ease;
+    }
+
+    .toggle-password:hover {
+      transform: scale(1.1);
+    }
+
+    button {
+      width: 100%;
+      background: #f97316;
+      color: #ffffff;
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 0.75rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-top: 1rem;
+    }
+
+    button:hover {
+      background: #ea580c;
+    }
+
+    .links {
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+      color: #64748b;
+    }
+
+    .links a {
+      color: #f97316;
+      text-decoration: none;
+      margin: 0 0.4rem;
+    }
+
+    @media (max-width: 500px) {
+      .signin-container {
+        padding: 2rem 1.25rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="signin-container">
+    <h2>Welcome Back 👋</h2>
+    <p class="subtitle">Login to continue ordering your favorite South Indian snacks</p>
+
+    <div class="input-group">
+      <label for="mobile">Mobile Number</label>
+      <div class="mobile-wrapper">
+        <div class="country-display">
+          🇮🇳 <span>+91</span>
+        </div>
+        <input type="tel" id="mobile" placeholder="Enter 10-digit number" maxlength="10" />
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label for="password">Password</label>
+      <div class="password-wrapper">
+        <input type="password" id="password" placeholder="••••••••" />
+        <i class="ri-eye-off-line toggle-password" id="togglePassword"></i>
+      </div>
+    </div>
+
+    <button>Sign In</button>
+
+    <div class="links">
+      <a href="signup.html">Create Account</a> |
+      <a href="#">Forgot Password?</a>
+    </div>
+  </div>
+
+  <script>
+    const togglePassword = document.getElementById("togglePassword");
+    const passwordInput = document.getElementById("password");
+
+    togglePassword.addEventListener("click", () => {
+      const isPassword = passwordInput.type === "password";
+      passwordInput.type = isPassword ? "text" : "password";
+      togglePassword.classList.toggle("ri-eye-off-line");
+      togglePassword.classList.toggle("ri-eye-line");
+    });
+
+
+
+    document.querySelector("button").addEventListener("click", async () => {
+      const mobile = document.getElementById("mobile").value.trim();
+      const password = document.getElementById("password").value;
+
+      try {
+        const res = await fetch("http://localhost:3000/api/auth/signin", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mobile, password })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          alert("Login successful!");
+          localStorage.setItem("dabdab_user", JSON.stringify(data.user));
+          window.location.replace("index.html"); // Redirect to main page
+        } else {
+          alert(data.message);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Error logging in.");
+      }
+
+      if (res.ok) {
+        alert("Login successful!");
+        localStorage.setItem("dabdab_user", JSON.stringify(data.user));
+        window.location.href = "success.html"; // ✅ redirect after login
+      } else {
+        alert(data.message);
+      }
+    });
+  </script>
+
+</body>
+
+</html>

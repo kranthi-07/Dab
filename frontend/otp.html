@@ -1,0 +1,190 @@
+<!-- Filename: otp.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Enter OTP | Dab Dab</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Lora:wght@600&display=swap" rel="stylesheet">
+  <style>
+    /* Same styling as before */
+    body {
+      background: #fff7ed;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 1rem;
+    }
+
+    .otp-container {
+      background: #ffffff;
+      padding: 2.5rem 2rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    h2 {
+      font-family: 'Lora', serif;
+      font-size: 1.9rem;
+      color: #0f172a;
+      margin-bottom: 0.4rem;
+    }
+
+    #mobile-display {
+      color: #475569;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .otp-inputs {
+      display: flex;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .otp-inputs input {
+      width: 2.2rem;
+      height: 2.9rem;
+      font-size: 1.5rem;
+      text-align: center;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.75rem;
+      background: #f9fafb;
+    }
+
+    .otp-inputs input:focus {
+      outline: none;
+      border-color: #f97316;
+      background: #ffffff;
+    }
+
+    .timer {
+      color: #64748b;
+      font-size: 0.9rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .resend-btn {
+      background: none;
+      border: none;
+      color: #f97316;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .resend-btn:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    .verify-btn {
+      width: 100%;
+      background: #f97316;
+      color: #ffffff;
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 0.75rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .verify-btn:hover:enabled {
+      background: #ea580c;
+    }
+
+    .verify-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div class="otp-container">
+    <h2>Enter OTP</h2>
+    <p id="mobile-display">Sending OTP...</p>
+
+    <div class="otp-inputs">
+      <input type="text" maxlength="1" oninput="moveNext(this)" />
+      <input type="text" maxlength="1" oninput="moveNext(this)" />
+      <input type="text" maxlength="1" oninput="moveNext(this)" />
+      <input type="text" maxlength="1" oninput="moveNext(this)" />
+      <input type="text" maxlength="1" oninput="moveNext(this)" />
+      <input type="text" maxlength="1" oninput="moveNext(this)" />
+    </div>
+
+    <div class="timer" id="timer">Resend OTP in <span id="countdown">30</span>s</div>
+    <button class="resend-btn" id="resendBtn" disabled onclick="resendOTP()">Resend OTP</button>
+    <button class="verify-btn" id="verifyBtn" onclick="verifyOTP()" disabled>Verify</button>
+  </div>
+
+  <script>
+    const inputs = document.querySelectorAll(".otp-inputs input");
+    const verifyBtn = document.getElementById("verifyBtn");
+
+    function moveNext(input) {
+      if (input.value.length === 1) {
+        const next = input.nextElementSibling;
+        if (next && next.tagName === "INPUT") {
+          next.focus();
+        }
+      }
+      checkOTPCompletion();
+    }
+
+    function checkOTPCompletion() {
+      const allFilled = Array.from(inputs).every(input => input.value.length === 1);
+      verifyBtn.disabled = !allFilled;
+    }
+
+    function resendOTP() {
+      document.getElementById("countdown").textContent = "30";
+      document.getElementById("resendBtn").disabled = true;
+      startTimer();
+      alert("OTP resent to your mobile number.");
+    }
+
+    function verifyOTP() {
+      let otp = "";
+      inputs.forEach(input => otp += input.value);
+      if (otp.length === 6) {
+        window.location.href = "success.html"; // Redirect after success
+      } else {
+        alert("Please enter a valid 6-digit OTP.");
+      }
+    }
+
+    function startTimer() {
+      let timeLeft = 30;
+      const timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("countdown").textContent = timeLeft;
+        if (timeLeft === 0) {
+          clearInterval(timer);
+          document.getElementById("resendBtn").disabled = false;
+        }
+      }, 1000);
+    }
+
+    // Display mobile number from localStorage
+    const mobile = localStorage.getItem("dabdab_mobile");
+    const mobileDisplay = document.getElementById("mobile-display");
+    if (mobile) {
+      mobileDisplay.textContent = `OTP sent to ${mobile}`;
+    } else {
+      mobileDisplay.textContent = "Mobile number not found.";
+    }
+
+    startTimer();
+  </script>
+</body>
+</html>

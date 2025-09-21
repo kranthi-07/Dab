@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dab Dab - South Indian Snacks</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <style>
+    .item-card {
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border-radius: 12px;
+      overflow: hidden;
+      background-color: #fff;
+    }
+    .item-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+    .item-card h3,
+    .item-card p {
+      margin: 0;
+      text-decoration: none;
+      color: #222;
+    }
+    .item-card h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .item-card p {
+      font-size: 0.9rem;
+      color: #555;
+    }
+    .favorites-items img {
+      width: 100px;
+      height: 100px;
+      border-radius: 10px;
+      object-fit: cover;
+      margin-right: 10px;
+    }
+    .favorites-items {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .fav-card {
+      display: flex;
+      align-items: center;
+      background: #fff;
+      padding: 10px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      cursor: pointer;
+    }
+    .fav-card span {
+      font-weight: 600;
+      color: #f97316;
+    }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closeAllViews()"></div>
+
+<header>
+  <div class="logo">Dab Dab</div>
+  <nav><i class="ri-menu-line" onclick="toggleSidebar()"></i></nav>
+</header>
+
+<div class="sidebar" id="sidebar">
+  <p onclick="openView('profileView')"><i class="ri-user-line"></i> Profile</p>
+  <p onclick="openView('ordersView')"><i class="ri-file-list-line"></i> Orders</p>
+  <p onclick="openView('favoritesView'); loadFavorites();"><i class="ri-heart-line"></i> Favorites</p>
+  <p onclick="openView('contactView')"><i class="ri-contacts-line"></i> Contact</p>
+  <p onclick="openView('logoutView')"><i class="ri-logout-box-line"></i> Logout</p>
+</div>
+
+<!-- Views -->
+<div class="content-view" id="profileView">
+  <div class="back-button" onclick="goBack('profileView')"><i class="ri-arrow-left-s-line"></i><p>Back</p></div>
+  <h3>Profile</h3>
+  <div class="content-body" id="profileContent"></div>
+</div>
+
+<div class="content-view" id="ordersView">
+  <div class="back-button" onclick="goBack('ordersView')"><i class="ri-arrow-left-s-line"></i><p>Back</p></div>
+  <h3>Orders</h3>
+  <div class="content-body">No orders placed yet.</div>
+</div>
+
+<div class="content-view" id="favoritesView">
+  <div class="back-button" onclick="goBack('favoritesView')"><i class="ri-arrow-left-s-line"></i><p>Back</p></div>
+  <h3>Favorites</h3>
+  <div class="content-body">
+    <div id="favoritesList" class="favorites-items">Loading favorites...</div>
+  </div>
+</div>
+
+<div class="content-view" id="contactView">
+  <div class="back-button" onclick="goBack('contactView')"><i class="ri-arrow-left-s-line"></i><p>Back</p></div>
+  <h3>Contact Us</h3>
+  <div class="content-body">Reach us at support@dabdab.com</div>
+</div>
+
+<div class="content-view" id="logoutView">
+  <div class="back-button" onclick="goBack('logoutView')"><i class="ri-arrow-left-s-line"></i><p>Back</p></div>
+  <h3>Confirm Logout</h3>
+  <div class="content-body">
+    <p>Are you sure you want to logout?</p>
+    <button class="edit-btn active" onclick="confirmLogout()">Yes, Logout</button>
+  </div>
+</div>
+
+<header>
+  <a class="logo"><img src="Assets/dabdab.jpg" alt=""></a>
+  <nav>
+    <a href="signin.html" class="user"><i class='bx bx-user'></i></a>
+    <a class="menu" id="menuBtn"><i class='bx bx-menu'></i></a>
+    <a href="cart.html" class="cart"><i class='bx bx-cart'></i></a>
+  </nav>
+</header>
+
+<section class="template">
+  <div class="template-text">
+    <h1>Delicious South Indian Snacks</h1>
+    <p>Crispy, Spicy & Authentic Straight from South India to your plate.</p>
+    <button class="order-btn" onclick="goToOrder()">🔥 ORDER NOW</button>
+    <p class="tagline">Freshly made. Delivered fast.</p>
+  </div>
+  <div class="template-img">
+    <img src="Assets/Punugulu-half.png" alt="South Indian Snacks" />
+  </div>
+  <div id="order"></div>
+</section>
+
+<section class="popular-section">
+  <h2>Popular Items</h2>
+  <div class="items">
+    <div class="item-card" onclick="goToItem('Punugulu','₹25','Crispy, fluffy','Assets/Punugulu.jpg')">
+      <span class="tag">🔥 Popular</span>
+      <img src="Assets/Punugulu.jpg" alt="Punugulu" />
+      <div class="item-info">
+        <div><h3>Punugulu</h3><p>Crispy, fluffy</p></div>
+        <span>₹25</span>
+      </div>
+    </div>
+
+    <div class="item-card" onclick="goToItem('Bajji','₹25','Street-style, hot','Assets/Bajji.jpg')">
+      <img src="Assets/Bajji.jpg" alt="Bajji" />
+      <div class="item-info">
+        <div><h3>Bajji</h3><p>Street-style, hot</p></div>
+        <span>₹25</span>
+      </div>
+    </div>
+
+    <div class="item-card" onclick="goToItem('Bites','₹25','Assorted snacks','Assets/Dosa.jpg')">
+      <img src="Assets/Dosa.jpg" alt="More Snacks" />
+      <div class="item-info">
+        <div><h3>Bites</h3><p>Assorted snacks</p></div>
+        <span>₹25</span>
+      </div>
+    </div>
+
+    <div class="item-card" onclick="goToItem('Vada','₹25','Donut-style, crispy','Assets/Vada.jpg')">
+      <img src="Assets/Vada.jpg" alt="Vada" />
+      <div class="item-info">
+        <div><h3>Vada</h3><p>Donut-style, crispy</p></div>
+        <span>₹25</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  function goToItem(name, price, desc, image) {
+    const url = `item.html?name=${encodeURIComponent(name)}&price=${encodeURIComponent(price)}&desc=${encodeURIComponent(desc)}&image=${encodeURIComponent(image)}`;
+    window.location.href = url;
+  }
+
+  function loadFavorites() {
+    const list = document.getElementById("favoritesList");
+    list.innerHTML = "";
+    const favs = JSON.parse(localStorage.getItem("dabdab_favorites") || "[]");
+    if (favs.length === 0) {
+      list.innerHTML = "<p>You haven’t favorited any items yet.</p>";
+      return;
+    }
+
+    favs.forEach(item => {
+      const div = document.createElement("div");
+      div.className = "fav-card";
+      div.onclick = () => goToItem(item.name, `₹${item.price}`, "From your favorites", item.image);
+      div.innerHTML = `
+        <img src="${item.image}" alt="${item.name}">
+        <div>
+          <h4>${item.name}</h4>
+          <span>₹${item.price}</span>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("active");
+    document.getElementById("overlay").classList.toggle("active");
+  }
+
+  function closeAllViews() {
+    document.querySelectorAll('.content-view').forEach(view => view.style.display = 'none');
+    document.getElementById("sidebar").classList.remove("active");
+    document.getElementById("overlay").classList.remove("active");
+  }
+
+  function openView(viewId) {
+    closeAllViews();
+    document.getElementById(viewId).style.display = 'block';
+    document.getElementById("sidebar").classList.remove("active");
+    document.getElementById("overlay").classList.remove("active");
+  }
+
+  function goBack(viewId) {
+    document.getElementById(viewId).style.display = 'none';
+  }
+
+  function confirmLogout() {
+    alert("You have been logged out.");
+    // Optionally redirect or clear session data
+  }
+
+  function goToOrder() {
+    document.querySelector(".popular-section").scrollIntoView({ behavior: "smooth" });
+  }
+</script>
+
+</body>
+</html>
