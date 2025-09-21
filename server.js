@@ -10,14 +10,17 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ---------- MIDDLEWARE ----------
-const session = require("express-session");
-const MongoStore = require("connect-mongo");
+const session = require('express-session');
+const MongoStore = require('connect-mongo'); // if using MongoDB store
+
+app.set('trust proxy', 1); // for Render/Heroku if behind proxy
 
 app.use(session({
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.SESSION_SECRET || 'defaultsecret', // <- MUST have a secret
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI })
+  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
+  cookie: { secure: process.env.NODE_ENV === 'production' } // only send cookies over HTTPS in prod
 }));
 
 

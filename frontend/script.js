@@ -8,6 +8,30 @@ const searchWrapper = document.getElementById('searchWrapper');
 const searchInput = document.getElementById('searchInput');
 const suggestionsBox = document.getElementById('suggestions');
 
+
+
+
+function addDragClose(el) {
+  let startX = 0;
+  let currentX = 0;
+  el.addEventListener("touchstart", e => {
+    startX = e.touches[0].clientX; touchingSidebar = true;
+  });
+  el.addEventListener("touchmove", e => {
+    if (!touchingSidebar) return;
+    currentX = e.touches[0].clientX;
+    const delta = currentX - startX;
+    if (delta < -70) {
+      closeAllViews();
+      touchingSidebar = false;
+    }
+  });
+  el.addEventListener("touchend", () => {
+    touchingSidebar = false;
+  });
+}
+addDragClose(sidebar);
+ views.forEach(view => addDragClose(view));
 // ---------------------------- ITEMS DATA ----------------------------
 const itemData = {
   Punugulu: { price: 25, desc: "Crispy, fluffy South Indian snack", image: "Assets/Punugulu.jpg" },
