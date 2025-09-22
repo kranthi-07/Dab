@@ -208,7 +208,7 @@
     </form>
 
     <div class="links">
-      <a href="login.html">Already have an account? Sign In</a>
+      <a onclick="window.location.replace('signin.html')">Already have an account? Sign In</a>
     </div>
   </div>
 
@@ -248,29 +248,37 @@
     document.getElementById("signupForm").addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const name = document.getElementById("name").value;
-      // const email = document.getElementById("email").value;
-      const mobile = document.getElementById("mobile").value;
-      const password = document.getElementById("password").value;
+      const name = document.getElementById("name").value.trim();
+      const mobile = document.getElementById("mobile").value.trim();
+      const password = document.getElementById("password").value.trim();
 
       try {
-        const res = await fetch("https://dab-1.onrender.com/signup", {
+        const res = await fetch("https://dab-1.onrender.com/api/auth/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({ name, mobile, password }),
         });
 
-        const data = await res.json(); // if response is not JSON → error happens here
-        alert(data.message);
+        let data;
+        try {
+          data = await res.json();
+        } catch {
+          alert("Server returned unexpected response");
+          return;
+        }
+
+        alert(data.message || "Signup response received");
 
         if (data.success) {
-          window.location.href = "signin.html"; // redirect on success
+          window.location.href = "signin.html";
         }
       } catch (error) {
         console.error("Error:", error);
-        alert("Something went wrong!");
+        alert("Something went wrong! Please try again.");
       }
     });
+
   </script>
 </body>
 
