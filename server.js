@@ -144,6 +144,34 @@ app.post("/api/cart", async (req, res) => {
   res.json({ success: true, cart: user.cart });
 });
 
+
+// DELETE /api/cart
+app.delete("/api/cart", async (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({ message: "Not logged in" });
+  }
+
+  const { productId } = req.body;
+  if (!productId) {
+    return res.status(400).json({ message: "Product ID required" });
+  }
+
+  try {
+    const user = await User.findById(req.session.userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Remove item from cart
+    user.cart = user.cart.filter(item => item.productId !== productId);
+    await user.save();
+
+    res.json({ success: true, message: "Item removed from cart", cart: user.cart });
+  } catch (err) {
+    console.error("Cart delete error:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+
 // ---------- FAVORITES ----------
 app.get("/api/favorites", async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ message: "Not logged in" });
@@ -161,6 +189,35 @@ app.post("/api/favorites", async (req, res) => {
   }
   res.json({ success: true });
 });
+
+
+
+
+// DELETE /api/favorites
+app.delete("/api/favorites", async (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({ message: "Not logged in" });
+  }
+
+  const { productId } = req.body;
+  if (!productId) {
+    return res.status(400).json({ message: "Product ID required" });
+  }
+
+  try {
+    const user = await User.findById(req.session.userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.favorites = user.favorites.filter(item => item.productId !== productId);
+    await user.save();
+
+    res.json({ success: true, message: "Item removed from favorites", favorites: user.favorites });
+  } catch (err) {
+    console.error("Favorites delete error:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 
 // ---------- LOGOUT ----------
 app.get("/logout", (req, res) => {
