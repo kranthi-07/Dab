@@ -188,7 +188,7 @@
 
     async function loadTotal() {
         try {
-            const res = await fetch("/api/cart", { credentials: "include" });
+            const res = await fetch("https://dab-1.onrender.com/api/cart", { credentials: "include" });
             if (res.status === 401) {
                 document.querySelector(".total").textContent = "Total : ₹0";
                 return;

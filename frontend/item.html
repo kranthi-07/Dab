@@ -248,7 +248,7 @@
     // ----- helper: is user logged in? -----
     async function isLoggedIn() {
       try {
-        const res = await fetch('/api/auth/profile', { credentials: 'include' });
+        const res = await fetch('https://dab-1.onrender.com/api/auth/profile', { credentials: 'include' });
         return res.ok;
       } catch (err) {
         console.error('isLoggedIn error', err);
@@ -275,7 +275,7 @@
 
       // user is logged in — get cart and check if this item exists
       try {
-        const res = await fetch('/api/cart', { credentials: 'include' });
+        const res = await fetch('https://dab-1.onrender.com/api/cart', { credentials: 'include' });
         if (!res.ok) {
           // fallback to show Add
           cartBtn.textContent = 'Add to Cart';
@@ -314,7 +314,7 @@
     // ----- get favorites from backend -----
     async function getUserFavorites() {
       try {
-        const res = await fetch('/api/favorites', { credentials: 'include' });
+        const res = await fetch('https://dab-1.onrender.com/api/favorites', { credentials: 'include' });
         if (!res.ok) return [];
         const data = await res.json();
         return data.items || [];
@@ -327,7 +327,7 @@
     // ----- check if user is logged in -----
     async function isLoggedIn() {
       try {
-        const res = await fetch('/api/auth/profile', { credentials: 'include' });
+        const res = await fetch('https://dab-1.onrender.com/api/auth/profile', { credentials: 'include' });
         return res.ok;
       } catch (err) {
         console.error('isLoggedIn error', err);
@@ -360,7 +360,7 @@
       try {
         if (!currentlyFav) {
           // Add to favorites
-          const res = await fetch('/api/favorites', {
+          const res = await fetch('https://dab-1.onrender.com/api/favorites', {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
@@ -370,7 +370,7 @@
           if (!res.ok || !data.success) throw new Error(data.message || 'Failed to add favorite');
         } else {
           // Remove from favorites
-          const res = await fetch('/api/favorites', {
+          const res = await fetch('https://dab-1.onrender.com/api/favorites', {
             method: 'DELETE',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
@@ -402,7 +402,7 @@
 
         const pid = name.replace(/\s+/g, "_");
         // fetch current cart
-        const cartRes = await fetch('/api/cart', { credentials: 'include' });
+        const cartRes = await fetch('https://dab-1.onrender.com/api/cart', { credentials: 'include' });
         if (!cartRes.ok) {
           alert('Could not access cart. Try again.');
           return;
@@ -413,7 +413,7 @@
 
         if (!exists) {
           // add
-          const addRes = await fetch('/api/cart', {
+          const addRes = await fetch('https://dab-1.onrender.com/api/cart', {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
@@ -434,8 +434,8 @@
             alert('Failed to add to cart.');
           }
         } else {
-          // remove (DELETE /api/cart)
-          const delRes = await fetch('/api/cart', {
+          // remove (DELETE https://dab-1.onrender.com/api/cart)
+          const delRes = await fetch('https://dab-1.onrender.com/api/cart', {
             method: 'DELETE',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },

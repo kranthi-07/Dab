@@ -14,12 +14,17 @@ const PORT = process.env.PORT || 3000;
 app.set("trust proxy", 1); // For Render/Heroku HTTPS
 
 app.use(session({
-  secret: process.env.SESSION_SECRET, // MUST be set on Render
+  secret: process.env.SESSION_SECRET,       // REQUIRED
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
-  cookie: { secure: process.env.NODE_ENV === "production", maxAge: 1000 * 60 * 60 * 24 } // 1 day
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // Only send cookies over HTTPS
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 24                 // 1 day
+  }
 }));
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

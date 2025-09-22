@@ -261,7 +261,7 @@
     async function loadCart() {
       loaderOverlay.style.display = 'flex'; // Show loader
       try {
-        const res = await fetch('/api/cart', { credentials: 'include' });
+        const res = await fetch('https://dab-1.onrender.com/api/cart', { credentials: 'include' });
         if (res.status === 401) {
           cartContainer.innerHTML = `
             <div class="empty-msg">
@@ -355,7 +355,7 @@
       if (qty <= 0) return;
       loaderOverlay.style.display = 'flex';
       try {
-        const res = await fetch('/api/cart', {
+        const res = await fetch('https://dab-1.onrender.com/api/cart', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -373,7 +373,7 @@
     async function removeItem(productId) {
       loaderOverlay.style.display = 'flex';
       try {
-        const res = await fetch('/api/cart', {
+        const res = await fetch('https://dab-1.onrender.com/api/cart', {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',

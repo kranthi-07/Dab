@@ -161,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loader.style.display = "block";
   userIcon.style.display = "none";
 
-  fetch("/api/auth/profile", { method: "GET", credentials: "include" })
+  fetch("https://dab-1.onrender.com/api/auth/profile", { method: "GET", credentials: "include" })
     .then(res => {
       loader.style.display = "none";
       if (res.status === 401) {
@@ -194,7 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // ---------------------------- LOGOUT ----------------------------
 function confirmLogout() {
-  fetch("/logout", { method: "GET", credentials: "include" })
+  fetch("https://dab-1.onrender.com/logout", { method: "GET", credentials: "include" })
     .then(res => res.json())
     .then(data => {
       if (data.success) window.location.replace("/signin.html");
@@ -206,13 +206,13 @@ function confirmLogout() {
 // ---------------------------- CART ----------------------------
 async function addToCart(productId, name, qty = 1) {
   try {
-    const profileRes = await fetch('/api/auth/profile', { credentials: 'include' });
+    const profileRes = await fetch('https://dab-1.onrender.com/api/auth/profile', { credentials: 'include' });
     if (profileRes.status === 401) {
       alert("Please login to add items to cart.");
       return;
     }
 
-    const addRes = await fetch('/api/cart', {
+    const addRes = await fetch('https://dab-1.onrender.com/api/cart', {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -231,7 +231,7 @@ async function addToCart(productId, name, qty = 1) {
 // ---------------------------- FAVORITES ----------------------------
 async function isLoggedIn() {
   try {
-    const res = await fetch('/api/auth/profile', { credentials: 'include' });
+    const res = await fetch('https://dab-1.onrender.com/api/auth/profile', { credentials: 'include' });
     return res.ok;
   } catch (err) {
     return false;
@@ -241,7 +241,7 @@ async function isLoggedIn() {
 async function fetchFavorites() {
   if (!await isLoggedIn()) return [];
   try {
-    const res = await fetch('/api/favorites', { credentials: 'include' });
+    const res = await fetch('https://dab-1.onrender.com/api/favorites', { credentials: 'include' });
     if (!res.ok) return [];
     const data = await res.json();
     return data.items || [];
@@ -285,7 +285,7 @@ async function renderFavoritesMenu() {
     // Remove favorite
     div.children[1].onclick = async () => {
       if (!await isLoggedIn()) { alert("Login first!"); return; }
-      await fetch('/api/favorites', {
+      await fetch('https://dab-1.onrender.com/api/favorites', {
         method: 'DELETE',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -308,9 +308,9 @@ async function updateFavButton(name, productId, price, image, desc, favBtn) {
     if (!await isLoggedIn()) { alert("Login first!"); window.location.href = 'signin.html'; return; }
 
     if (exists) {
-      await fetch('/api/favorites', { method: 'DELETE', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ productId }) });
+      await fetch('https://dab-1.onrender.com/api/favorites', { method: 'DELETE', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ productId }) });
     } else {
-      await fetch('/api/favorites', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ productId, name, price, image, desc }) });
+      await fetch('https://dab-1.onrender.com/api/favorites', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ productId, name, price, image, desc }) });
     }
 
     updateFavButton(name, productId, price, image, desc, favBtn);
