@@ -172,6 +172,44 @@ app.delete("/api/cart", async (req, res) => {
 });
 
 
+
+
+
+
+
+// PUT /api/cart -> Update quantity of a product
+app.put("/api/cart", async (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({ message: "Not logged in" });
+  }
+
+  const { productId, qty } = req.body;
+  if (!productId || qty <= 0) {
+    return res.status(400).json({ message: "Invalid product ID or quantity" });
+  }
+
+  try {
+    const user = await User.findById(req.session.userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Find item in cart
+    const item = user.cart.find(i => i.productId === productId);
+    if (!item) {
+      return res.status(404).json({ message: "Item not found in cart" });
+    }
+
+    // Update quantity
+    item.qty = qty;
+    await user.save();
+
+    res.json({ success: true, cart: user.cart });
+  } catch (err) {
+    console.error("Cart update error:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+
 // ---------- FAVORITES ----------
 app.get("/api/favorites", async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ message: "Not logged in" });
