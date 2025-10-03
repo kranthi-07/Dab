@@ -196,24 +196,6 @@
     // if URL image is relative (like "Assets/Punugulu.jpg") the browser will resolve it to full URL when assigned to src
     document.getElementById("itemImage").src = image || 'Assets/placeholder.png';
 
-    const ingredientsMap = {
-      Punugulu: ["Urad dal", "Rice", "Onion", "Green chili", "Coriander"],
-      Bajji: ["Besan", "Chili", "Onion", "Salt", "Ajwain"],
-      Vada: ["Urad dal", "Pepper", "Curry leaves", "Salt"],
-      Bites: ["Mixed flours", "Spices", "Oil"],
-      Idli: ["Rice", "Urad dal", "Fenugreek seeds"],
-      Dosa: ["Rice", "Urad dal", "Salt"]
-    };
-
-    const ul = document.getElementById("itemIngredients");
-    const ingredientList = ingredientsMap[name] || ["Details coming soon"];
-    ingredientList.forEach(i => {
-      const li = document.createElement("li");
-      li.textContent = i;
-      ul.appendChild(li);
-    });
-
-
 
     const cartBtn = document.getElementById("cartBtn");
     const favBtn = document.getElementById("favBtn");
