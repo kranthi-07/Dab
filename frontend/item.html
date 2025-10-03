@@ -24,7 +24,7 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(255, 255, 255, 0.482);
+      background: rgba(255, 250, 245, 0.975);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -200,12 +200,6 @@
       color: #000;
     }
 
-    #itemIngredients {
-      margin-left: 20px;
-      color: #444;
-      font-size: 0.95rem;
-      padding-left: 1rem;
-    }
   </style>
 </head>
 
@@ -227,8 +221,7 @@
       </div>
 
       <div class="desc" id="itemDesc">Loading...</div>
-      <ul id="itemIngredients"></ul>
-
+     
       <div class="actions">
         <button id="cartBtn" class="add-cart">Add to Cart</button>
         <button id="favBtn" class="add-fav">❤ Add to Favorites</button>
@@ -287,22 +280,6 @@
     document.getElementById("itemDesc").textContent = desc;
     document.getElementById("itemImage").src = image || 'Assets/placeholder.png';
 
-    const ingredientsMap = {
-      Punugulu: ["Urad dal", "Rice", "Onion", "Green chili", "Coriander"],
-      Bajji: ["Besan", "Chili", "Onion", "Salt", "Ajwain"],
-      Vada: ["Urad dal", "Pepper", "Curry leaves", "Salt"],
-      Bites: ["Mixed flours", "Spices", "Oil"],
-      Idli: ["Rice", "Urad dal", "Fenugreek seeds"],
-      Dosa: ["Rice", "Urad dal", "Salt"]
-    };
-    const ingredientList = ingredientsMap[name] || ["Details coming soon"];
-    const ul = document.getElementById("itemIngredients");
-    ingredientList.forEach(i => {
-      const li = document.createElement("li");
-      li.textContent = i;
-      ul.appendChild(li);
-    });
-
     /* -------------------------
        API helpers (uses credentials)
        ------------------------- */
@@ -346,8 +323,8 @@
        ------------------------- */
     async function updateButtons() {
       // show button-level processing while we fetch states
-      setBtnProcessing(cartBtn, true, 'Checking...');
-      setBtnProcessing(favBtn, true, 'Checking...');
+      setBtnProcessing(cartBtn, true, 'Updating...');
+      setBtnProcessing(favBtn, true, 'Updating...');
 
       try {
         const logged = await isLoggedIn();
@@ -415,7 +392,7 @@
       try {
         // Show full-page loader and small button spinner
         showPageLoader();
-        setBtnProcessing(cartBtn, true, 'Processing...');
+        setBtnProcessing(cartBtn, true, 'Adding...');
 
         // get current cart state
         const cartRes = await fetch('https://dab-1.onrender.com/api/cart', { credentials: 'include' });
@@ -443,8 +420,8 @@
           const addData = await addRes.json();
           if (addRes.ok && addData.success) {
             // immediate update so user sees result before loader hides
-            cartBtn.textContent = 'Remove from Cart';
-            cartBtn.style.background = '#fc9171';
+            cartBtn.textContent = 'Add to Cart';
+            cartBtn.style.background = '#ff5722';
           } else {
             console.error('Add error', addData);
             alert(addData.message || 'Failed to add to cart.');
@@ -459,8 +436,8 @@
           });
           const delData = await delRes.json();
           if (delRes.ok && delData.success) {
-            cartBtn.textContent = 'Add to Cart';
-            cartBtn.style.background = '#ff5722';
+            cartBtn.textContent = 'Remove from Cart';
+            cartBtn.style.background = '#fc9171';
           } else {
             console.error('Remove error', delData);
             alert(delData.message || 'Failed to remove from cart.');
