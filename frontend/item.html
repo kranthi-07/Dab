@@ -7,8 +7,8 @@
   <title>Item Details - Dab Dab</title>
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
   <style>
-    /* (your existing styles unchanged) */
     body {
       font-family: 'Poppins', sans-serif;
       background: #fff8f0;
@@ -17,20 +17,19 @@
       color: #333;
     }
 
-
-
+    /* ===== Full Page Loader ===== */
     #pageLoader {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: #fff;
+      background: rgba(255, 255, 255, 0.482);
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 999999;
-      transition: opacity 0.3s ease;
+      z-index: 999;
+      transition: opacity 0.2s ease;
     }
 
     #pageLoader.hidden {
@@ -39,8 +38,8 @@
     }
 
     .loader {
-      width: 70px;
-      height: 70px;
+      width: 40px;
+      height: 40px;
       border: 8px solid #ffe5d0;
       border-top: 8px solid #f97316;
       border-radius: 50%;
@@ -57,9 +56,20 @@
       }
     }
 
+    /* small spinner used inside buttons */
+    .btn-spinner {
+      display: inline-block;
+      vertical-align: middle;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(0, 0, 0, 0.12);
+      border-top: 2px solid rgba(0, 0, 0, 0.45);
+      border-radius: 50%;
+      margin-right: 8px;
+      animation: spin 0.8s linear infinite;
+    }
 
-
-
+    /* ===== Item styles (same as before) ===== */
     .item-wrapper {
       max-width: 900px;
       margin: 2rem auto;
@@ -93,47 +103,47 @@
       margin: 0 auto;
       padding: 0 1rem;
       display: flex;
-      flex-direction: row;
       align-items: center;
       justify-content: space-between;
     }
 
     .item-info h1 {
       font-size: 2rem;
-      margin-bottom: 1rem;
+      margin: 0;
     }
 
     .item-info .price {
       font-size: 1.5rem;
       color: #f97316;
       font-weight: bold;
-      margin-bottom: 1rem;
-      padding-top: 15px;
+      margin-left: 1rem;
     }
 
-    .item-info .desc {
+    .desc {
       margin-left: 20px;
       font-size: 1rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1rem;
       color: #444;
     }
 
-
     .actions {
       display: flex;
-      align-items: center;
-      justify-content: center;
       gap: 1rem;
+      justify-content: center;
       margin-top: 1rem;
     }
 
     .actions button {
       padding: 0.7rem 1.5rem;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      transition: 0.3s;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
 
     .add-cart {
@@ -148,29 +158,20 @@
     }
 
     .add-fav {
-      width: 170px;
-      height: 55px;
       background: #ffc107;
       color: black;
+      height: 55px;
+      width: 170px;
     }
 
     .add-fav:hover {
       background: #ffb300;
     }
 
-    .back-btn {
-      text-align: center;
-      margin-top: 2rem;
-      display: block;
-      text-decoration: none;
-      color: #666;
-    }
-
     .go-to-cart {
-      width: 100%;
       display: flex;
-      align-items: center;
       justify-content: center;
+      margin-top: 20px;
     }
 
     .go-to-cart a {
@@ -187,34 +188,47 @@
       color: #fff;
     }
 
-    .go-to-cart i {
-      margin-left: 5px;
+    .back-btn {
+      text-align: center;
+      margin-top: 2rem;
+      display: block;
+      text-decoration: none;
+      color: #666;
     }
 
     .back-btn:hover {
       color: #000;
     }
+
+    #itemIngredients {
+      margin-left: 20px;
+      color: #444;
+      font-size: 0.95rem;
+      padding-left: 1rem;
+    }
   </style>
 </head>
 
 <body>
-
-  <div id="pageLoader">
-    <div class="loader"></div>
+  <!-- Full-page loader; hidden by default -->
+  <div id="pageLoader" class="hidden" aria-hidden="true">
+    <div class="loader" aria-hidden="true"></div>
   </div>
 
   <div class="item-wrapper">
     <div class="item-image">
       <img id="itemImage" src="" alt="Item Image">
     </div>
-    <div class="item-info">
 
+    <div class="item-info">
       <div class="name-price">
-        <h1 id="itemName"></h1>
+        <h1 id="itemName">Item</h1>
         <div class="price" id="itemPrice">₹--</div>
       </div>
 
       <div class="desc" id="itemDesc">Loading...</div>
+      <ul id="itemIngredients"></ul>
+
       <div class="actions">
         <button id="cartBtn" class="add-cart">Add to Cart</button>
         <button id="favBtn" class="add-fav">❤ Add to Favorites</button>
@@ -223,13 +237,44 @@
       <div class="go-to-cart">
         <a href="cart.html">Go to Cart<i class="ri-arrow-right-line"></i></a>
       </div>
+
       <a onclick="window.location.replace('index.html')" class="back-btn"><i class="ri-arrow-left-line"></i> Back to
         Home</a>
     </div>
   </div>
 
   <script>
-    // ----- read URL params and populate UI -----
+    /* -------------------------
+       Helper: loader controls
+       ------------------------- */
+    const pageLoaderEl = document.getElementById('pageLoader');
+    function showPageLoader() { pageLoaderEl.classList.remove('hidden'); pageLoaderEl.setAttribute('aria-hidden', 'false'); }
+    function hidePageLoader() { pageLoaderEl.classList.add('hidden'); pageLoaderEl.setAttribute('aria-hidden', 'true'); }
+
+    /* tiny in-button processing state (no full-page loader) */
+    function setBtnProcessing(btn, isLoading, label = 'Processing...') {
+      if (!btn) return;
+      if (isLoading) {
+        // store original content so we can restore later
+        if (!btn.dataset.orig) btn.dataset.orig = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<span class="btn-spinner" aria-hidden="true"></span> ${label}`;
+      } else {
+        btn.disabled = false;
+        if (btn.dataset.orig) {
+          btn.innerHTML = btn.dataset.orig;
+          delete btn.dataset.orig;
+        }
+      }
+    }
+
+    /* -------------------------
+       DOM refs & init
+       ------------------------- */
+    const cartBtn = document.getElementById('cartBtn');
+    const favBtn = document.getElementById('favBtn');
+
+    // populate UI from URL params
     const params = new URLSearchParams(window.location.search);
     const name = decodeURIComponent(params.get("name") || "");
     const priceStr = decodeURIComponent(params.get("price") || "₹0");
@@ -237,17 +282,30 @@
     const image = decodeURIComponent(params.get("image") || "");
     const price = parseInt(String(priceStr).replace("₹", "").trim()) || 0;
 
-    document.getElementById("itemName").textContent = name;
+    document.getElementById("itemName").textContent = name || "Product";
     document.getElementById("itemPrice").textContent = `₹${price}`;
     document.getElementById("itemDesc").textContent = desc;
-    // if URL image is relative (like "Assets/Punugulu.jpg") the browser will resolve it to full URL when assigned to src
     document.getElementById("itemImage").src = image || 'Assets/placeholder.png';
 
+    const ingredientsMap = {
+      Punugulu: ["Urad dal", "Rice", "Onion", "Green chili", "Coriander"],
+      Bajji: ["Besan", "Chili", "Onion", "Salt", "Ajwain"],
+      Vada: ["Urad dal", "Pepper", "Curry leaves", "Salt"],
+      Bites: ["Mixed flours", "Spices", "Oil"],
+      Idli: ["Rice", "Urad dal", "Fenugreek seeds"],
+      Dosa: ["Rice", "Urad dal", "Salt"]
+    };
+    const ingredientList = ingredientsMap[name] || ["Details coming soon"];
+    const ul = document.getElementById("itemIngredients");
+    ingredientList.forEach(i => {
+      const li = document.createElement("li");
+      li.textContent = i;
+      ul.appendChild(li);
+    });
 
-    const cartBtn = document.getElementById("cartBtn");
-    const favBtn = document.getElementById("favBtn");
-
-    // ----- helper: is user logged in? -----
+    /* -------------------------
+       API helpers (uses credentials)
+       ------------------------- */
     async function isLoggedIn() {
       try {
         const res = await fetch('https://dab-1.onrender.com/api/auth/profile', { credentials: 'include' });
@@ -258,214 +316,117 @@
       }
     }
 
-    // ----- update the cart button (Add / Remove / Login) -----
-    async function updateButtons() {
-      // default
-      cartBtn.disabled = true;
-      cartBtn.textContent = 'Loading...';
-      cartBtn.style.opacity = '0.9';
-
-      const logged = await isLoggedIn();
-      if (!logged) {
-        cartBtn.textContent = 'Login to add';
-        cartBtn.onclick = () => window.location.href = 'signin.html';
-        cartBtn.style.background = '#f97316';
-        cartBtn.disabled = false;
-        // favorites still available locally
-        return;
-      }
-
-      // user is logged in — get cart and check if this item exists
+    async function getCart() {
       try {
         const res = await fetch('https://dab-1.onrender.com/api/cart', { credentials: 'include' });
-        if (!res.ok) {
-          // fallback to show Add
-          cartBtn.textContent = 'Add to Cart';
-          cartBtn.onclick = toggleCart;
-          cartBtn.style.background = '#ff5722';
-          cartBtn.disabled = false;
+        if (!res.ok) return { items: [] };
+        const json = await res.json();
+        return json || { items: [] };
+      } catch (err) {
+        console.error('getCart error', err);
+        return { items: [] };
+      }
+    }
 
+    async function getUserFavorites() {
+      try {
+        const res = await fetch('https://dab-1.onrender.com/api/favorites', { credentials: 'include' });
+        if (!res.ok) return [];
+        const json = await res.json();
+        return json.items || [];
+      } catch (err) {
+        console.error('getUserFavorites error', err);
+        return [];
+      }
+    }
+
+    /* -------------------------
+       updateButtons - sets initial button states
+       (NO full-page loader here; uses small button spinner)
+       ------------------------- */
+    async function updateButtons() {
+      // show button-level processing while we fetch states
+      setBtnProcessing(cartBtn, true, 'Checking...');
+      setBtnProcessing(favBtn, true, 'Checking...');
+
+      try {
+        const logged = await isLoggedIn();
+        if (!logged) {
+          cartBtn.innerHTML = 'Login to add';
+          cartBtn.disabled = false;
+          cartBtn.style.background = '#f97316';
+          cartBtn.onclick = () => window.location.href = 'signin.html';
+
+          favBtn.innerHTML = '❤ Login to add';
+          favBtn.disabled = false;
+          favBtn.onclick = () => window.location.href = 'signin.html';
           return;
         }
-        const data = await res.json();
-        const items = data.items || [];
-        const pid = name.replace(/\s+/g, "_");
-        const exists = items.some(i => i.productId === pid);
 
-        if (exists) {
+        // logged in — fetch both cart & favs in parallel
+        const [cartData, favs] = await Promise.all([getCart(), getUserFavorites()]);
+        const pid = name.replace(/\s+/g, "_");
+        const inCart = (cartData.items || []).some(i => i.productId === pid);
+        const inFav = (favs || []).some(i => i.productId === pid);
+
+        // set cart button
+        if (inCart) {
           cartBtn.textContent = 'Remove from Cart';
           cartBtn.style.background = '#fc9171';
         } else {
           cartBtn.textContent = 'Add to Cart';
           cartBtn.style.background = '#ff5722';
         }
-        cartBtn.onclick = toggleCart;
         cartBtn.disabled = false;
+        cartBtn.onclick = toggleCart;
+
+        // set fav button
+        favBtn.textContent = inFav ? '❤ Remove from Favorites' : '❤ Add to Favorites';
+        favBtn.disabled = false;
+        favBtn.onclick = toggleFavorite;
+
       } catch (err) {
         console.error('updateButtons error', err);
+        // fallback UI
         cartBtn.textContent = 'Add to Cart';
-        cartBtn.onclick = toggleCart;
         cartBtn.disabled = false;
         cartBtn.style.background = '#ff5722';
+        cartBtn.onclick = toggleCart;
+
+        favBtn.textContent = '❤ Add to Favorites';
+        favBtn.disabled = false;
+        favBtn.onclick = toggleFavorite;
+      } finally {
+        // ensure button-level spinner cleared
+        setBtnProcessing(cartBtn, false);
+        setBtnProcessing(favBtn, false);
       }
-
-
     }
 
-
-    // _______________________________________________LOADER_______________________________________
-
-
-    function showPageLoader() {
-      document.getElementById("pageLoader").classList.remove("hidden");
-    }
-    function hidePageLoader() {
-      document.getElementById("pageLoader").classList.add("hidden");
-    }
-    // hide loader when page fully loaded
-    window.addEventListener("load", hidePageLoader);
-
-
-
-    document.getElementById("itemName").textContent = name;
-    document.getElementById("itemPrice").textContent = `₹${price}`;
-    document.getElementById("itemDesc").textContent = desc;
-    document.getElementById("itemImage").src = image || 'Assets/placeholder.png';
-
-    // ✅ Example: wrap toggleCart with loader
+    /* -------------------------
+       Toggle Cart (shows full-page loader while performing action)
+       The loader will only be hidden after the button text is updated
+       ------------------------- */
     async function toggleCart() {
-      try {
-        showPageLoader(); // show loader during request
-        // ... your existing toggleCart fetch logic here ...
-      } catch (err) {
-        console.error(err);
-        alert("Cart update failed");
-      } finally {
-        hidePageLoader(); // hide loader always
-      }
-    }
-
-    async function toggleFavorite(currentlyFav) {
-      try {
-        showPageLoader();
-        // ... your existing favorites fetch logic here ...
-      } catch (err) {
-        console.error(err);
-        alert("Favorites update failed");
-      } finally {
-        hidePageLoader();
-      }
-    }
-
-
-
-
-
-
-
-    // ----- toggle favorite (keeps localStorage) -----
-    // ----- get favorites from backend -----
-    async function getUserFavorites() {
-      try {
-        const res = await fetch('https://dab-1.onrender.com/api/favorites', { credentials: 'include' });
-        if (!res.ok) return [];
-        const data = await res.json();
-        return data.items || [];
-      } catch (err) {
-        console.error(err);
-        return [];
-      }
-    }
-
-    // ----- check if user is logged in -----
-    async function isLoggedIn() {
-      try {
-        const res = await fetch('https://dab-1.onrender.com/api/auth/profile', { credentials: 'include' });
-        return res.ok;
-      } catch (err) {
-        console.error('isLoggedIn error', err);
-        return false;
-      }
-    }
-
-    // ----- update favorite button UI -----
-    async function updateFavButton() {
-      const logged = await isLoggedIn();
-      if (!logged) {
-        favBtn.textContent = "❤ Login to add";
-        favBtn.onclick = () => window.location.href = 'signin.html';
-        return;
-      }
-
-      const favs = await getUserFavorites();
-      const inFav = favs.some(i => i.productId === name.replace(/\s+/g, "_"));
-
-      favBtn.textContent = inFav ? "❤ Remove from Favorites" : "❤ Add to Favorites";
-      favBtn.onclick = () => toggleFavorite(inFav);
-    }
-
-    // ----- toggle favorite in backend -----
-    async function toggleFavorite(currentlyFav) {
       const logged = await isLoggedIn();
       if (!logged) { window.location.href = 'signin.html'; return; }
 
       const pid = name.replace(/\s+/g, "_");
       try {
-        if (!currentlyFav) {
-          // Add to favorites
-          const res = await fetch('https://dab-1.onrender.com/api/favorites', {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ productId: pid, name, price, image: document.getElementById('itemImage').src, desc })
-          });
-          const data = await res.json();
-          if (!res.ok || !data.success) throw new Error(data.message || 'Failed to add favorite');
-        } else {
-          // Remove from favorites
-          const res = await fetch('https://dab-1.onrender.com/api/favorites', {
-            method: 'DELETE',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ productId: pid })
-          });
-          const data = await res.json();
-          if (!res.ok || !data.success) throw new Error(data.message || 'Failed to remove favorite');
-        }
-        // refresh button state
-        updateFavButton();
-      } catch (err) {
-        console.error(err);
-        alert('Could not update favorites. Try again.');
-      }
-    }
+        // Show full-page loader and small button spinner
+        showPageLoader();
+        setBtnProcessing(cartBtn, true, 'Processing...');
 
-    // Initialize favorites button
-    updateFavButton();
-
-    // ----- main toggleCart: adds or removes from backend cart -----
-    async function toggleCart() {
-      try {
-        // ensure logged in
-        const logged = await isLoggedIn();
-        if (!logged) {
-          window.location.href = 'signin.html';
-          return;
-        }
-
-        const pid = name.replace(/\s+/g, "_");
-        // fetch current cart
+        // get current cart state
         const cartRes = await fetch('https://dab-1.onrender.com/api/cart', { credentials: 'include' });
         if (!cartRes.ok) {
-          alert('Could not access cart. Try again.');
-          return;
+          throw new Error('Could not access cart');
         }
         const cartData = await cartRes.json();
-        const items = cartData.items || [];
-        const exists = items.some(i => i.productId === pid);
+        const exists = (cartData.items || []).some(i => i.productId === pid);
 
         if (!exists) {
-          // add
+          // add to cart
           const addRes = await fetch('https://dab-1.onrender.com/api/cart', {
             method: 'POST',
             credentials: 'include',
@@ -481,13 +442,15 @@
           });
           const addData = await addRes.json();
           if (addRes.ok && addData.success) {
-            alert(`${name} added to cart!`);
+            // immediate update so user sees result before loader hides
+            cartBtn.textContent = 'Remove from Cart';
+            cartBtn.style.background = '#fc9171';
           } else {
             console.error('Add error', addData);
-            alert('Failed to add to cart.');
+            alert(addData.message || 'Failed to add to cart.');
           }
         } else {
-          // remove (DELETE https://dab-1.onrender.com/api/cart)
+          // remove from cart
           const delRes = await fetch('https://dab-1.onrender.com/api/cart', {
             method: 'DELETE',
             credentials: 'include',
@@ -496,25 +459,95 @@
           });
           const delData = await delRes.json();
           if (delRes.ok && delData.success) {
-            alert(`${name} removed from cart.`);
+            cartBtn.textContent = 'Add to Cart';
+            cartBtn.style.background = '#ff5722';
           } else {
             console.error('Remove error', delData);
-            alert('Failed to remove from cart.');
+            alert(delData.message || 'Failed to remove from cart.');
           }
         }
 
-        // refresh button text/state
+        // refresh server state (non-blocking visual since we already updated UI)
         await updateButtons();
       } catch (err) {
         console.error('toggleCart error', err);
-        alert('Something went wrong while updating cart.');
+        alert('Something went wrong while updating the cart. Check console.');
+      } finally {
+        setBtnProcessing(cartBtn, false);
+        // hide loader only after final button update
+        hidePageLoader();
       }
     }
 
-    // initialize
+    /* -------------------------
+       Toggle Favorite (mirror of cart behavior)
+       ------------------------- */
+    async function toggleFavorite() {
+      const logged = await isLoggedIn();
+      if (!logged) { window.location.href = 'signin.html'; return; }
+
+      const pid = name.replace(/\s+/g, "_");
+      try {
+        showPageLoader();
+        setBtnProcessing(favBtn, true, 'Processing...');
+
+        // check current fav state
+        const favs = await getUserFavorites();
+        const inFav = (favs || []).some(i => i.productId === pid);
+
+        if (!inFav) {
+          // add favorite
+          const res = await fetch('https://dab-1.onrender.com/api/favorites', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId: pid, name, price, image: document.getElementById('itemImage').src, desc })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            favBtn.textContent = '❤ Remove from Favorites';
+          } else {
+            console.error('fav add error', data);
+            alert(data.message || 'Failed to add favorite.');
+          }
+        } else {
+          // remove favorite
+          const res = await fetch('https://dab-1.onrender.com/api/favorites', {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId: pid })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            favBtn.textContent = '❤ Add to Favorites';
+          } else {
+            console.error('fav remove error', data);
+            alert(data.message || 'Failed to remove favorite.');
+          }
+        }
+
+        await updateButtons();
+      } catch (err) {
+        console.error('toggleFavorite error', err);
+        alert('Something went wrong while updating favorites. Check console.');
+      } finally {
+        setBtnProcessing(favBtn, false);
+        hidePageLoader();
+      }
+    }
+
+    /* -------------------------
+       Init: set buttons states when loaded
+       ------------------------- */
+    // hide page loader once page resources finished
+    window.addEventListener('load', () => {
+      hidePageLoader();
+    });
+
+    // run initial button states
     updateButtons();
   </script>
-
 </body>
 
 </html>
