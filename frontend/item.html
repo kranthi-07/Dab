@@ -28,7 +28,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 999;
+      z-index: 9999;
       transition: opacity 0.2s ease;
     }
 
@@ -38,10 +38,10 @@
     }
 
     .loader {
-      width: 40px;
-      height: 40px;
-      border: 8px solid #ffe5d0;
-      border-top: 8px solid #f97316;
+      width: 50px;
+      height: 50px;
+      border: 6px solid #ffe5d0;
+      border-top: 6px solid #f97316;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
@@ -56,20 +56,7 @@
       }
     }
 
-    /* small spinner used inside buttons */
-    .btn-spinner {
-      display: inline-block;
-      vertical-align: middle;
-      width: 14px;
-      height: 14px;
-      border: 2px solid rgba(0, 0, 0, 0.12);
-      border-top: 2px solid rgba(0, 0, 0, 0.45);
-      border-radius: 50%;
-      margin-right: 8px;
-      animation: spin 0.8s linear infinite;
-    }
-
-    /* ===== Item styles (same as before) ===== */
+    /* ===== Item styles ===== */
     .item-wrapper {
       max-width: 900px;
       margin: 2rem auto;
@@ -153,6 +140,10 @@
       width: 170px;
     }
 
+    .add-cart.remove {
+      background: #fc9171 !important;
+    }
+
     .add-cart:hover {
       background: #e64a19;
     }
@@ -161,7 +152,7 @@
       background: #ffc107;
       color: black;
       height: 55px;
-      width: 170px;
+      width: 200px;
     }
 
     .add-fav:hover {
@@ -199,14 +190,13 @@
     .back-btn:hover {
       color: #000;
     }
-
   </style>
 </head>
 
 <body>
-  <!-- Full-page loader; hidden by default -->
-  <div id="pageLoader" class="hidden" aria-hidden="true">
-    <div class="loader" aria-hidden="true"></div>
+  <!-- Full-page loader (visible on start) -->
+  <div id="pageLoader">
+    <div class="loader"></div>
   </div>
 
   <div class="item-wrapper">
@@ -221,7 +211,7 @@
       </div>
 
       <div class="desc" id="itemDesc">Loading...</div>
-     
+
       <div class="actions">
         <button id="cartBtn" class="add-cart">Add to Cart</button>
         <button id="favBtn" class="add-fav">❤ Add to Favorites</button>
@@ -237,37 +227,14 @@
   </div>
 
   <script>
-    /* -------------------------
-       Helper: loader controls
-       ------------------------- */
     const pageLoaderEl = document.getElementById('pageLoader');
-    function showPageLoader() { pageLoaderEl.classList.remove('hidden'); pageLoaderEl.setAttribute('aria-hidden', 'false'); }
-    function hidePageLoader() { pageLoaderEl.classList.add('hidden'); pageLoaderEl.setAttribute('aria-hidden', 'true'); }
+    function showPageLoader() { pageLoaderEl.classList.remove('hidden'); }
+    function hidePageLoader() { pageLoaderEl.classList.add('hidden'); }
 
-    /* tiny in-button processing state (no full-page loader) */
-    function setBtnProcessing(btn, isLoading, label = 'Processing...') {
-      if (!btn) return;
-      if (isLoading) {
-        // store original content so we can restore later
-        if (!btn.dataset.orig) btn.dataset.orig = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = `<span class="btn-spinner" aria-hidden="true"></span> ${label}`;
-      } else {
-        btn.disabled = false;
-        if (btn.dataset.orig) {
-          btn.innerHTML = btn.dataset.orig;
-          delete btn.dataset.orig;
-        }
-      }
-    }
-
-    /* -------------------------
-       DOM refs & init
-       ------------------------- */
     const cartBtn = document.getElementById('cartBtn');
     const favBtn = document.getElementById('favBtn');
 
-    // populate UI from URL params
+    // product details from URL
     const params = new URLSearchParams(window.location.search);
     const name = decodeURIComponent(params.get("name") || "");
     const priceStr = decodeURIComponent(params.get("price") || "₹0");
@@ -280,250 +247,110 @@
     document.getElementById("itemDesc").textContent = desc;
     document.getElementById("itemImage").src = image || 'Assets/placeholder.png';
 
-    /* -------------------------
-       API helpers (uses credentials)
-       ------------------------- */
-    async function isLoggedIn() {
-      try {
-        const res = await fetch('https://dab-1.onrender.com/api/auth/profile', { credentials: 'include' });
-        return res.ok;
-      } catch (err) {
-        console.error('isLoggedIn error', err);
-        return false;
-      }
-    }
-
+    // === API helpers ===
     async function getCart() {
       try {
         const res = await fetch('https://dab-1.onrender.com/api/cart', { credentials: 'include' });
         if (!res.ok) return { items: [] };
-        const json = await res.json();
-        return json || { items: [] };
-      } catch (err) {
-        console.error('getCart error', err);
+        return await res.json();
+      } catch {
         return { items: [] };
       }
     }
 
-    async function getUserFavorites() {
+    async function getFavorites() {
       try {
         const res = await fetch('https://dab-1.onrender.com/api/favorites', { credentials: 'include' });
         if (!res.ok) return [];
         const json = await res.json();
         return json.items || [];
-      } catch (err) {
-        console.error('getUserFavorites error', err);
+      } catch {
         return [];
       }
     }
 
-    /* -------------------------
-       updateButtons - sets initial button states
-       (NO full-page loader here; uses small button spinner)
-       ------------------------- */
+    // === Update buttons ===
     async function updateButtons() {
-      // show button-level processing while we fetch states
-      setBtnProcessing(cartBtn, true, 'Updating...');
-      setBtnProcessing(favBtn, true, 'Updating...');
+      const pid = name.replace(/\s+/g, "_");
+      const [cartData, favs] = await Promise.all([getCart(), getFavorites()]);
+      const inCart = (cartData.items || []).some(i => i.productId === pid);
+      const inFav = (favs || []).some(i => i.productId === pid);
 
-      try {
-        const logged = await isLoggedIn();
-        if (!logged) {
-          cartBtn.innerHTML = 'Login to add';
-          cartBtn.disabled = false;
-          cartBtn.style.background = '#f97316';
-          cartBtn.onclick = () => window.location.href = 'signin.html';
-
-          favBtn.innerHTML = '❤ Login to add';
-          favBtn.disabled = false;
-          favBtn.onclick = () => window.location.href = 'signin.html';
-          return;
-        }
-
-        // logged in — fetch both cart & favs in parallel
-        const [cartData, favs] = await Promise.all([getCart(), getUserFavorites()]);
-        const pid = name.replace(/\s+/g, "_");
-        const inCart = (cartData.items || []).some(i => i.productId === pid);
-        const inFav = (favs || []).some(i => i.productId === pid);
-
-        // set cart button
-        if (inCart) {
-          cartBtn.textContent = 'Remove from Cart';
-          cartBtn.style.background = '#fc9171';
-        } else {
-          cartBtn.textContent = 'Add to Cart';
-          cartBtn.style.background = '#ff5722';
-        }
-        cartBtn.disabled = false;
-        cartBtn.onclick = toggleCart;
-
-        // set fav button
-        favBtn.textContent = inFav ? '❤ Remove from Favorites' : '❤ Add to Favorites';
-        favBtn.disabled = false;
-        favBtn.onclick = toggleFavorite;
-
-      } catch (err) {
-        console.error('updateButtons error', err);
-        // fallback UI
-        cartBtn.textContent = 'Add to Cart';
-        cartBtn.disabled = false;
-        cartBtn.style.background = '#ff5722';
-        cartBtn.onclick = toggleCart;
-
-        favBtn.textContent = '❤ Add to Favorites';
-        favBtn.disabled = false;
-        favBtn.onclick = toggleFavorite;
-      } finally {
-        // ensure button-level spinner cleared
-        setBtnProcessing(cartBtn, false);
-        setBtnProcessing(favBtn, false);
+      // cart button
+      if (inCart) {
+        cartBtn.textContent = "Remove from Cart";
+        cartBtn.classList.add("remove");
+      } else {
+        cartBtn.textContent = "Add to Cart";
+        cartBtn.classList.remove("remove");
       }
+      cartBtn.onclick = toggleCart;
+
+      // fav button
+      favBtn.textContent = inFav ? "❤ Remove from Favorites" : "❤ Add to Favorites";
+      favBtn.onclick = toggleFavorite;
+
+      hidePageLoader(); // hide only after buttons ready
     }
 
-    /* -------------------------
-       Toggle Cart (shows full-page loader while performing action)
-       The loader will only be hidden after the button text is updated
-       ------------------------- */
+    // === Toggle Cart ===
     async function toggleCart() {
-      const logged = await isLoggedIn();
-      if (!logged) { window.location.href = 'signin.html'; return; }
-
+      showPageLoader();
       const pid = name.replace(/\s+/g, "_");
-      try {
-        // Show full-page loader and small button spinner
-        showPageLoader();
-        setBtnProcessing(cartBtn, true, 'Adding...');
 
-        // get current cart state
-        const cartRes = await fetch('https://dab-1.onrender.com/api/cart', { credentials: 'include' });
-        if (!cartRes.ok) {
-          throw new Error('Could not access cart');
-        }
-        const cartData = await cartRes.json();
-        const exists = (cartData.items || []).some(i => i.productId === pid);
+      const cartData = await getCart();
+      const exists = (cartData.items || []).some(i => i.productId === pid);
 
-        if (!exists) {
-          // add to cart
-          const addRes = await fetch('https://dab-1.onrender.com/api/cart', {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              productId: pid,
-              name,
-              price,
-              image: document.getElementById('itemImage').src,
-              desc,
-              qty: 1
-            })
-          });
-          const addData = await addRes.json();
-          if (addRes.ok && addData.success) {
-            // immediate update so user sees result before loader hides
-            cartBtn.textContent = 'Add to Cart';
-            cartBtn.style.background = '#ff5722';
-          } else {
-            console.error('Add error', addData);
-            alert(addData.message || 'Failed to add to cart.');
-          }
-        } else {
-          // remove from cart
-          const delRes = await fetch('https://dab-1.onrender.com/api/cart', {
-            method: 'DELETE',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ productId: pid })
-          });
-          const delData = await delRes.json();
-          if (delRes.ok && delData.success) {
-            cartBtn.textContent = 'Remove from Cart';
-            cartBtn.style.background = '#fc9171';
-          } else {
-            console.error('Remove error', delData);
-            alert(delData.message || 'Failed to remove from cart.');
-          }
-        }
-
-        // refresh server state (non-blocking visual since we already updated UI)
-        await updateButtons();
-      } catch (err) {
-        console.error('toggleCart error', err);
-        alert('Something went wrong while updating the cart. Check console.');
-      } finally {
-        setBtnProcessing(cartBtn, false);
-        // hide loader only after final button update
-        hidePageLoader();
+      if (!exists) {
+        // add
+        await fetch('https://dab-1.onrender.com/api/cart', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: pid, name, price, image, desc, qty: 1 })
+        });
+      } else {
+        // remove
+        await fetch('https://dab-1.onrender.com/api/cart', {
+          method: 'DELETE',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: pid })
+        });
       }
+
+      await updateButtons();
     }
 
-    /* -------------------------
-       Toggle Favorite (mirror of cart behavior)
-       ------------------------- */
+    // === Toggle Favorite ===
     async function toggleFavorite() {
-      const logged = await isLoggedIn();
-      if (!logged) { window.location.href = 'signin.html'; return; }
-
+      showPageLoader();
       const pid = name.replace(/\s+/g, "_");
-      try {
-        showPageLoader();
-        setBtnProcessing(favBtn, true, 'Processing...');
 
-        // check current fav state
-        const favs = await getUserFavorites();
-        const inFav = (favs || []).some(i => i.productId === pid);
+      const favs = await getFavorites();
+      const inFav = (favs || []).some(i => i.productId === pid);
 
-        if (!inFav) {
-          // add favorite
-          const res = await fetch('https://dab-1.onrender.com/api/favorites', {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ productId: pid, name, price, image: document.getElementById('itemImage').src, desc })
-          });
-          const data = await res.json();
-          if (res.ok && data.success) {
-            favBtn.textContent = '❤ Remove from Favorites';
-          } else {
-            console.error('fav add error', data);
-            alert(data.message || 'Failed to add favorite.');
-          }
-        } else {
-          // remove favorite
-          const res = await fetch('https://dab-1.onrender.com/api/favorites', {
-            method: 'DELETE',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ productId: pid })
-          });
-          const data = await res.json();
-          if (res.ok && data.success) {
-            favBtn.textContent = '❤ Add to Favorites';
-          } else {
-            console.error('fav remove error', data);
-            alert(data.message || 'Failed to remove favorite.');
-          }
-        }
-
-        await updateButtons();
-      } catch (err) {
-        console.error('toggleFavorite error', err);
-        alert('Something went wrong while updating favorites. Check console.');
-      } finally {
-        setBtnProcessing(favBtn, false);
-        hidePageLoader();
+      if (!inFav) {
+        await fetch('https://dab-1.onrender.com/api/favorites', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: pid, name, price, image, desc })
+        });
+      } else {
+        await fetch('https://dab-1.onrender.com/api/favorites', {
+          method: 'DELETE',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: pid })
+        });
       }
+
+      await updateButtons();
     }
 
-    /* -------------------------
-       Init: set buttons states when loaded
-       ------------------------- */
-    // hide page loader once page resources finished
-    window.addEventListener('load', () => {
-      hidePageLoader();
-    });
-
-    // run initial button states
-    updateButtons();
+    // === Init ===
+    window.addEventListener('load', updateButtons);
   </script>
 </body>
 
