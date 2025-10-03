@@ -137,7 +137,8 @@
       background: #ff5722;
       color: white;
       height: 55px;
-      width: 170px;
+      width: 100%;
+      max-width: 45%;
     }
 
     .add-cart.remove {
@@ -152,7 +153,8 @@
       background: #ffc107;
       color: black;
       height: 55px;
-      width: 200px;
+      width: 100%;
+      max-width: 45%;
     }
 
     .add-fav:hover {
@@ -278,7 +280,7 @@
 
       // cart button
       if (inCart) {
-        cartBtn.textContent = "Remove from Cart";
+        cartBtn.textContent = "Remove";
         cartBtn.classList.add("remove");
       } else {
         cartBtn.textContent = "Add to Cart";
@@ -287,7 +289,7 @@
       cartBtn.onclick = toggleCart;
 
       // fav button
-      favBtn.textContent = inFav ? "❤ Remove from Favorites" : "❤ Add to Favorites";
+      favBtn.textContent = inFav ? "❤ Remove" : "❤ Add to Favorites";
       favBtn.onclick = toggleFavorite;
 
       hidePageLoader(); // hide only after buttons ready
