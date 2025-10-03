@@ -17,6 +17,49 @@
       color: #333;
     }
 
+
+
+    #pageLoader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999999;
+      transition: opacity 0.3s ease;
+    }
+
+    #pageLoader.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loader {
+      width: 70px;
+      height: 70px;
+      border: 8px solid #ffe5d0;
+      border-top: 8px solid #f97316;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+
+
+
     .item-wrapper {
       max-width: 900px;
       margin: 2rem auto;
@@ -71,11 +114,11 @@
     .item-info .desc {
       margin-left: 20px;
       font-size: 1rem;
-      margin-bottom: 1rem;
+      margin-bottom: 2rem;
       color: #444;
     }
 
-  
+
     .actions {
       display: flex;
       align-items: center;
@@ -155,6 +198,10 @@
 </head>
 
 <body>
+
+  <div id="pageLoader">
+    <div class="loader"></div>
+  </div>
 
   <div class="item-wrapper">
     <div class="item-image">
@@ -264,6 +311,57 @@
 
 
     }
+
+
+    // _______________________________________________LOADER_______________________________________
+
+
+    function showPageLoader() {
+      document.getElementById("pageLoader").classList.remove("hidden");
+    }
+    function hidePageLoader() {
+      document.getElementById("pageLoader").classList.add("hidden");
+    }
+    // hide loader when page fully loaded
+    window.addEventListener("load", hidePageLoader);
+
+
+
+    document.getElementById("itemName").textContent = name;
+    document.getElementById("itemPrice").textContent = `₹${price}`;
+    document.getElementById("itemDesc").textContent = desc;
+    document.getElementById("itemImage").src = image || 'Assets/placeholder.png';
+
+    // ✅ Example: wrap toggleCart with loader
+    async function toggleCart() {
+      try {
+        showPageLoader(); // show loader during request
+        // ... your existing toggleCart fetch logic here ...
+      } catch (err) {
+        console.error(err);
+        alert("Cart update failed");
+      } finally {
+        hidePageLoader(); // hide loader always
+      }
+    }
+
+    async function toggleFavorite(currentlyFav) {
+      try {
+        showPageLoader();
+        // ... your existing favorites fetch logic here ...
+      } catch (err) {
+        console.error(err);
+        alert("Favorites update failed");
+      } finally {
+        hidePageLoader();
+      }
+    }
+
+
+
+
+
+
 
     // ----- toggle favorite (keeps localStorage) -----
     // ----- get favorites from backend -----
