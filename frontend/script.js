@@ -354,26 +354,60 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+/* ----------------- GO TO ITEM (shows login popup if not logged in) ----------------- */
+async function goToItem(name) {
+  const data = itemData[name];
+  if (!data) return alert("Item details not found!");
 
-// Popup Logic
+  // If user is logged in, navigate to item page
+  if (await isLoggedIn()) {
+    const params = new URLSearchParams({
+      name,
+      price: `₹${data.price}`,
+      desc: data.desc,
+      image: data.image
+    });
+    window.location.href = `item.html?${params.toString()}`;
+    return;
+  }
+
+  // not logged in -> show login popup
+  popupOverlay.classList.add("active");
+  popupOverlay.setAttribute("aria-hidden", "false");
+  // focus login for keyboard users
+  loginBtn.focus();
+}
+
+/* ----------------- POPUP HANDLERS ----------------- */
+// elements (make sure these IDs match the HTML you added)
 const popupOverlay = document.getElementById("popupOverlay");
 const loginBtn = document.getElementById("loginBtn");
 const cancelBtn = document.getElementById("cancelBtn");
 
-// Show popup when any item is clicked
-document.querySelectorAll(".item, .product-card, .snack-item").forEach(item => {
-  item.addEventListener("click", (e) => {
-    e.preventDefault();
-    popupOverlay.classList.add("active");
-  });
-});
-
-// Redirect to login page
+// Login button redirects to signin page
 loginBtn.addEventListener("click", () => {
-  window.location.href = "signin.html"; // change if needed
+  // redirect to your signin page
+  window.location.href = "signin.html";
 });
 
-// Close popup
+// Cancel closes popup
 cancelBtn.addEventListener("click", () => {
   popupOverlay.classList.remove("active");
+  popupOverlay.setAttribute("aria-hidden", "true");
+});
+
+// Close popup when overlay (outside dialog) is clicked
+popupOverlay.addEventListener("click", (e) => {
+  if (e.target === popupOverlay) {
+    popupOverlay.classList.remove("active");
+    popupOverlay.setAttribute("aria-hidden", "true");
+  }
+});
+
+// Close on Escape key
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && popupOverlay.classList.contains("active")) {
+    popupOverlay.classList.remove("active");
+    popupOverlay.setAttribute("aria-hidden", "true");
+  }
 });
