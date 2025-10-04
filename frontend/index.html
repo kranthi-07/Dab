@@ -36,10 +36,13 @@
 
 
 
-            <div id="profileCard" style="background:#fff; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.1); padding:20px; max-width:400px; ">
+            <div id="profileCard"
+                style="background:#fff; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.1); padding:20px; max-width:400px; ">
 
                 <!-- ✅ Avatar with first letter -->
-                <div id="userAvatar" style="width:100px; height:100px; border-radius:50%; margin:0 auto 15px; display:flex; align-items:center; justify-content:center; font-size:40px; font-weight:bold; color:#fff; background:#ea580c;"></div>
+                <div id="userAvatar"
+                    style="width:100px; height:100px; border-radius:50%; margin:0 auto 15px; display:flex; align-items:center; justify-content:center; font-size:40px; font-weight:bold; color:#fff; background:#ea580c;">
+                </div>
 
                 <p style="margin:10px 0;"><strong>Name:</strong> <span id="userName">Loading...</span></p>
                 <p style="margin:10px 0;"><strong>Mobile:</strong> <span id="userMobile">Loading...</span></p>
@@ -52,7 +55,7 @@
     </div>
 
 
-    
+
     <div class="content-view" id="ordersView">
         <div class="back-button" onclick="goBack('ordersView')"><i class="ri-arrow-left-s-line"></i>
             <p>Back</p>
@@ -174,7 +177,7 @@
                 </div>
             </div>
 
-           
+
 
             <div class="item-card" onclick="goToItem('Vada','₹25','Donut-style, crispy','Assets/Vada.jpg')">
                 <img src="Assets/Vada.jpg" alt="Vada" />
@@ -188,7 +191,7 @@
             </div>
 
 
-             <div class="item-card" onclick="goToItem('Dosa','₹25','Donut-style, crispy','Assets/Dosa.jpg')">
+            <div class="item-card" onclick="goToItem('Dosa','₹25','Donut-style, crispy','Assets/Dosa.jpg')">
                 <img src="Assets/Dosa.jpg" alt="Vada" />
                 <div class="item-info">
                     <div>
@@ -223,9 +226,21 @@
         </div>
     </section>
 
-    <script src="script.js"></script>
+    <!-- Login Popup -->
+    <div class="popup-overlay" id="popupOverlay">
+        <div class="login-popup">
+            <h2>Login to Continue</h2>
+            <p>Please log in to view this item.</p>
+            <div class="popup-buttons">
+                <button id="loginBtn">Login</button>
+                <button id="cancelBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
 
 
 </body>
+<script src="script.js"></script>
 
 </html>

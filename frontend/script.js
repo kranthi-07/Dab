@@ -31,7 +31,7 @@ function addDragClose(el) {
   });
 }
 addDragClose(sidebar);
- views.forEach(view => addDragClose(view));
+views.forEach(view => addDragClose(view));
 // ---------------------------- ITEMS DATA ----------------------------
 const itemData = {
   Punugulu: { price: 25, desc: "Crispy, fluffy South Indian snack", image: "Assets/Punugulu.jpg" },
@@ -350,4 +350,30 @@ function initItemPage() {
 document.addEventListener("DOMContentLoaded", () => {
   renderFavoritesMenu();
   initItemPage();
+});
+
+
+
+
+// Popup Logic
+const popupOverlay = document.getElementById("popupOverlay");
+const loginBtn = document.getElementById("loginBtn");
+const cancelBtn = document.getElementById("cancelBtn");
+
+// Show popup when any item is clicked
+document.querySelectorAll(".item, .product-card, .snack-item").forEach(item => {
+  item.addEventListener("click", (e) => {
+    e.preventDefault();
+    popupOverlay.classList.add("active");
+  });
+});
+
+// Redirect to login page
+loginBtn.addEventListener("click", () => {
+  window.location.href = "signin.html"; // change if needed
+});
+
+// Close popup
+cancelBtn.addEventListener("click", () => {
+  popupOverlay.classList.remove("active");
 });
