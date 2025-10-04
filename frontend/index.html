@@ -226,17 +226,18 @@
         </div>
     </section>
 
-    <!-- Login Popup -->
-    <div class="popup-overlay" id="popupOverlay">
-        <div class="login-popup">
-            <h2>Login to Continue</h2>
-            <p>Please log in to view this item.</p>
+    <!-- DARK LOGIN POPUP -->
+    <div id="popupOverlay" class="popup-overlay" aria-hidden="true" role="dialog" aria-modal="true">
+        <div class="login-popup" role="document" aria-labelledby="popupTitle">
+            <h2 id="popupTitle">Login to Continue</h2>
+            <p>You need to log in to view this item.</p>
             <div class="popup-buttons">
-                <button id="loginBtn">Login</button>
-                <button id="cancelBtn">Cancel</button>
+                <button id="loginBtn" class="btn-login">Login</button>
+                <button id="cancelBtn" class="btn-cancel">Cancel</button>
             </div>
         </div>
     </div>
+
 
 
 

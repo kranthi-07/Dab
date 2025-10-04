@@ -355,12 +355,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* ----------------- GO TO ITEM (shows login popup if not logged in) ----------------- */
+// Popup and item logic
+const popupOverlay = document.getElementById("popupOverlay");
+const loginBtn = document.getElementById("loginBtn");
+const cancelBtn = document.getElementById("cancelBtn");
+
+// Handles navigation or popup trigger
 async function goToItem(name) {
   const data = itemData[name];
-  if (!data) return alert("Item details not found!");
+  if (!data) return alert("Item not found!");
 
-  // If user is logged in, navigate to item page
   if (await isLoggedIn()) {
+    // user is logged in -> go to item page
     const params = new URLSearchParams({
       name,
       price: `₹${data.price}`,
@@ -368,35 +374,25 @@ async function goToItem(name) {
       image: data.image
     });
     window.location.href = `item.html?${params.toString()}`;
-    return;
+  } else {
+    // user not logged in -> show popup
+    popupOverlay.classList.add("active");
+    popupOverlay.setAttribute("aria-hidden", "false");
+    // store attempted item so we can return after login
+    localStorage.setItem("redirectAfterLogin", name);
   }
-
-  // not logged in -> show login popup
-  popupOverlay.classList.add("active");
-  popupOverlay.setAttribute("aria-hidden", "false");
-  // focus login for keyboard users
-  loginBtn.focus();
 }
 
-/* ----------------- POPUP HANDLERS ----------------- */
-// elements (make sure these IDs match the HTML you added)
-const popupOverlay = document.getElementById("popupOverlay");
-const loginBtn = document.getElementById("loginBtn");
-const cancelBtn = document.getElementById("cancelBtn");
-
-// Login button redirects to signin page
+// Button handlers
 loginBtn.addEventListener("click", () => {
-  // redirect to your signin page
   window.location.href = "signin.html";
 });
 
-// Cancel closes popup
 cancelBtn.addEventListener("click", () => {
   popupOverlay.classList.remove("active");
   popupOverlay.setAttribute("aria-hidden", "true");
 });
 
-// Close popup when overlay (outside dialog) is clicked
 popupOverlay.addEventListener("click", (e) => {
   if (e.target === popupOverlay) {
     popupOverlay.classList.remove("active");
@@ -404,7 +400,6 @@ popupOverlay.addEventListener("click", (e) => {
   }
 });
 
-// Close on Escape key
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && popupOverlay.classList.contains("active")) {
     popupOverlay.classList.remove("active");
