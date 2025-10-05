@@ -7,9 +7,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet" />
   <style>
-
-    :root{
-      --primary-color:#f97316;
+    :root {
+      --primary-color: #f97316;
     }
 
 
@@ -184,9 +183,9 @@
     }
 
     .popup-box {
-      background-color: #ffa2608f;
-      backdrop-filter:blur(5px);
-      color: #fff;
+      background: linear-gradient(to bottom right, #fe8f40eb, #ffcdaaeb);
+      backdrop-filter: blur(5px);
+      color: #eaeaea;
       padding: 1.5rem 2rem;
       border-radius: 1rem;
       text-align: center;
@@ -207,6 +206,40 @@
         opacity: 1;
       }
     }
+
+    /* LOADER */
+
+    .loader-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 247, 237, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .loader {
+      width: 40px;
+      height: 40px;
+      border: 6px solid #fff;
+      border-top: 6px solid #f97316;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
   </style>
 </head>
 
@@ -217,6 +250,11 @@
     <div class="popup-box" id="popupMessage">
       <p>Message goes here</p>
     </div>
+  </div>
+
+
+  <div class="loader-overlay" id="loaderOverlay">
+    <div class="loader"></div>
   </div>
 
   <!-- ✅ Sign In Form -->
@@ -264,6 +302,7 @@
     // ✅ Sign-in logic using MongoDB backend + sessions
     const popup = document.getElementById("successPopup");
     const popupMessage = document.getElementById("popupMessage");
+    const loaderOverlay = document.getElementById("loaderOverlay");
 
     document.getElementById("signinBtn").addEventListener("click", async () => {
       const mobile = document.getElementById("mobile").value.trim();
@@ -289,15 +328,22 @@
           popupMessage.innerHTML = "✅ Logged in successfully!";
           popup.style.display = "flex";
 
+          // Show loader during redirect
           setTimeout(() => {
-            window.location.href = "index.html";
-          }, 2000);
+            popup.style.display = "none"; // hide popup
+            loaderOverlay.style.display = "flex"; // show loader
+            setTimeout(() => {
+              window.location.href = "index.html";
+            }, 800); // loader visible before redirect
+          }, 2000); // popup visible for 2s
         } else {
           popupMessage.innerHTML = "❌ Incorrect username or password";
           popup.style.display = "flex";
-          popup.addEventListener("click",()=>{
+
+          // Allow click to hide popup
+          popup.addEventListener("click", () => {
             popup.style.display = "none";
-          });
+          }, { once: true });
         }
 
       } catch (err) {
@@ -307,6 +353,7 @@
       }
     });
   </script>
+
 
 </body>
 
