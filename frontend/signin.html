@@ -7,6 +7,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet" />
   <style>
+
+    :root{
+      --primary-color:#f97316;
+    }
+
+
     * {
       margin: 0;
       padding: 0;
@@ -135,7 +141,7 @@
 
     button {
       width: 100%;
-      background: #f97316;
+      background: var(--primary-color);
       color: #ffffff;
       padding: 0.75rem 1rem;
       border: none;
@@ -158,7 +164,7 @@
     }
 
     .links a {
-      color: #f97316;
+      color: var(--primary-color);
       text-decoration: none;
       margin: 0 0.4rem;
     }
@@ -178,7 +184,8 @@
     }
 
     .popup-box {
-      background-color: #f97316;
+      background-color: #ffa2608f;
+      backdrop-filter:blur(5px);
       color: #fff;
       padding: 1.5rem 2rem;
       border-radius: 1rem;
@@ -288,7 +295,9 @@
         } else {
           popupMessage.innerHTML = "❌ Incorrect username or password";
           popup.style.display = "flex";
-          setTimeout(2000);
+          popup.addEventListener("click",()=>{
+            popup.style.display = "none";
+          });
         }
 
       } catch (err) {
