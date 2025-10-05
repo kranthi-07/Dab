@@ -9,18 +9,20 @@
   <style>
     :root {
       --primary-color: #f97316;
+      --input-bg: #f9fafb;
+      --input-border: #e5e7eb;
+      --popup-bg: rgba(255, 255, 255, 0.1);
     }
-
 
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
     }
 
     body {
-      background: #fff7ed;
-      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #fff7ed, #ffe7d6);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -30,13 +32,18 @@
 
     .signin-container {
       background: #ffffff;
-      padding: 2.5rem 2rem;
-      border-radius: 1.5rem;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+      padding: 3rem 2.5rem;
+      border-radius: 2rem;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
       width: 100%;
       max-width: 460px;
       text-align: center;
-      animation: fadeIn 0.4s ease;
+      animation: fadeIn 0.5s ease;
+      transition: transform 0.3s ease;
+    }
+
+    .signin-container:hover {
+      transform: translateY(-3px);
     }
 
     @keyframes fadeIn {
@@ -65,69 +72,58 @@
     }
 
     .input-group {
-      text-align: left;
+      position: relative;
       margin-bottom: 1.5rem;
-    }
-
-    label {
-      display: block;
-      font-size: 0.9rem;
-      color: #334155;
-      margin-bottom: 0.4rem;
-    }
-
-    .mobile-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 0.75rem;
-      padding: 0.75rem 1rem;
-    }
-
-    .country-display {
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-      font-size: 1rem;
-      color: #475569;
-      user-select: none;
-    }
-
-    .country-display span {
-      font-size: 1.3rem;
-    }
-
-    input[type="tel"] {
-      border: none;
-      font-size: 1rem;
       width: 100%;
-      background: transparent;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      border: 1px solid var(--input-border);
+      background: var(--input-bg);
       outline: none;
-      color: #0f172a;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .input-group input:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);
+      background: #fff;
+    }
+
+    .input-group label {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+      font-size: 0.9rem;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+
+    .input-group input:focus+label,
+    .input-group input:not(:placeholder-shown)+label {
+      top: -0.6rem;
+      left: 0.9rem;
+      font-size: 0.75rem;
+      color: var(--primary-color);
+      background: #fff;
+      padding: 0 0.25rem;
     }
 
     .password-wrapper {
       position: relative;
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 0.75rem;
-      display: flex;
-      align-items: center;
-      padding: 0.75rem 1rem;
-    }
-
-    .password-wrapper input {
-      flex: 1;
-      background: transparent;
-      border: none;
-      outline: none;
-      font-size: 1rem;
-      color: #0f172a;
     }
 
     .toggle-password {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
       font-size: 1.2rem;
       color: #64748b;
       cursor: pointer;
@@ -135,7 +131,7 @@
     }
 
     .toggle-password:hover {
-      transform: scale(1.1);
+      transform: translateY(-50%) scale(1.1);
     }
 
     button {
@@ -144,16 +140,18 @@
       color: #ffffff;
       padding: 0.75rem 1rem;
       border: none;
-      border-radius: 0.75rem;
+      border-radius: 1rem;
       font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: all 0.3s ease;
       margin-top: 1rem;
     }
 
     button:hover {
       background: #ea580c;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(249, 115, 22, 0.3);
     }
 
     .links {
@@ -166,9 +164,14 @@
       color: var(--primary-color);
       text-decoration: none;
       margin: 0 0.4rem;
+      transition: color 0.2s ease;
     }
 
-    /* ✅ Popup styling */
+    .links a:hover {
+      color: #ea580c;
+    }
+
+    /* Popup blur effect */
     .popup {
       position: fixed;
       top: 0;
@@ -178,20 +181,23 @@
       display: none;
       justify-content: center;
       align-items: center;
-      background-color: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      background-color: rgba(0, 0, 0, 0.2);
       z-index: 1000;
+      transition: opacity 0.3s ease;
     }
 
     .popup-box {
-      background: linear-gradient(to bottom right, #fe8f40, #e19f70);
-      color: #eaeaea;
+      background: var(--popup-bg);
+      backdrop-filter: blur(15px);
+      color: #fff;
       padding: 1.5rem 2rem;
-      border-radius: 1rem;
+      border-radius: 1.5rem;
       text-align: center;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-      animation: popIn 0.3s ease;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
       font-weight: 500;
       font-size: 1.1rem;
+      animation: popIn 0.3s ease;
     }
 
     @keyframes popIn {
@@ -206,7 +212,7 @@
       }
     }
 
-    /* LOADER */
+    /* Loader */
     .loader-overlay {
       position: fixed;
       top: 0;
@@ -215,7 +221,6 @@
       height: 100%;
       background: rgba(255, 247, 237, 0.9);
       display: none;
-      /* initially hidden */
       align-items: center;
       justify-content: center;
       z-index: 9999;
@@ -251,39 +256,31 @@
 
 <body>
 
-  <!-- ✅ Popup -->
+  <!-- Popup -->
   <div class="popup" id="successPopup">
     <div class="popup-box" id="popupMessage">
       <p>Message goes here</p>
     </div>
   </div>
 
-
   <div class="loader-overlay" id="loaderOverlay">
     <div class="loader"></div>
   </div>
 
-  <!-- ✅ Sign In Form -->
+  <!-- Sign In Form -->
   <div class="signin-container">
     <h2>Welcome Back 👋</h2>
     <p class="subtitle">Login to continue ordering your favorite South Indian snacks</p>
 
     <div class="input-group">
+      <input type="tel" id="mobile" placeholder=" " maxlength="10" />
       <label for="mobile">Mobile Number</label>
-      <div class="mobile-wrapper">
-        <div class="country-display">
-          🇮🇳 <span>+91</span>
-        </div>
-        <input type="tel" id="mobile" placeholder="Enter 10-digit number" maxlength="10" />
-      </div>
     </div>
 
-    <div class="input-group">
+    <div class="input-group password-wrapper">
+      <input type="password" id="password" placeholder=" " />
       <label for="password">Password</label>
-      <div class="password-wrapper">
-        <input type="password" id="password" placeholder="••••••••" />
-        <i class="ri-eye-off-line toggle-password" id="togglePassword"></i>
-      </div>
+      <i class="ri-eye-off-line toggle-password" id="togglePassword"></i>
     </div>
 
     <button id="signinBtn">Sign In</button>
@@ -295,12 +292,23 @@
   </div>
 
   <script>
-    // ✅ Sign-in logic using MongoDB backend + sessions
+    // Password toggle
+    const togglePassword = document.getElementById("togglePassword");
+    const passwordInput = document.getElementById("password");
+    togglePassword.addEventListener("click", () => {
+      const isPassword = passwordInput.type === "password";
+      passwordInput.type = isPassword ? "text" : "password";
+      togglePassword.classList.toggle("ri-eye-off-line");
+      togglePassword.classList.toggle("ri-eye-line");
+    });
+
+    // Sign-in logic
     const popup = document.getElementById("successPopup");
     const popupMessage = document.getElementById("popupMessage");
     const loaderOverlay = document.getElementById("loaderOverlay");
+    const signinBtn = document.getElementById("signinBtn");
 
-    document.getElementById("signinBtn").addEventListener("click", async () => {
+    async function handleSignIn() {
       const mobile = document.getElementById("mobile").value.trim();
       const password = document.getElementById("password").value;
 
@@ -326,18 +334,13 @@
 
           setTimeout(() => {
             popup.style.display = "none";
-
-            // Show loader with fade-in
             loaderOverlay.classList.add("show");
-
-            // redirect immediately
             window.location.href = "index.html";
           }, 2000);
 
         } else {
           popupMessage.innerHTML = "❌ Incorrect username or password";
           popup.style.display = "flex";
-
           popup.addEventListener("click", () => {
             popup.style.display = "none";
           }, { once: true });
@@ -348,6 +351,13 @@
         popupMessage.innerHTML = "❌ Server error, please try again later.";
         popup.style.display = "flex";
       }
+    }
+
+    signinBtn.addEventListener("click", handleSignIn);
+
+    // Press Enter to login
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") handleSignIn();
     });
   </script>
 
