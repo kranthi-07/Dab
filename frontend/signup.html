@@ -1,4 +1,3 @@
-<!-- signup.html -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,103 +6,117 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Create Account | Dab Dab</title>
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Lora:wght@600&display=swap"
-    rel="stylesheet" />
   <style>
+    :root {
+      --primary-color: #f97316;
+      --input-bg: #f9fafb;
+      --input-border: #e5e7eb;
+      --popup-bg: rgba(255, 255, 255, 0.1);
+    }
+
     * {
-      box-sizing: border-box;
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
     }
 
     body {
-      background: #fff7ed;
-      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #fff7ed, #ffe7d6);
       display: flex;
-      align-items: center;
       justify-content: center;
-      min-height: 100vh;
+      align-items: center;
+      height: 100vh;
       padding: 1rem;
     }
 
     .signup-container {
       background: #ffffff;
-      padding: 2.5rem 2rem;
-      border-radius: 1.5rem;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+      padding: 3rem 2.5rem;
+      border-radius: 2rem;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
       width: 100%;
       max-width: 460px;
       text-align: center;
+      animation: fadeIn 0.5s ease;
+      transition: transform 0.3s ease;
+    }
+
+    .signup-container:hover {
+      transform: translateY(-3px);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     h2 {
       font-family: 'Lora', serif;
       font-size: 2rem;
       color: #0f172a;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.5rem;
     }
 
     .subtitle {
       color: #475569;
       font-size: 0.95rem;
-      margin-bottom: 1.75rem;
+      margin-bottom: 2rem;
     }
 
     .input-group {
-      text-align: left;
-      margin-bottom: 1.4rem;
+      position: relative;
+      margin-bottom: 1.5rem;
+      width: 100%;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      border: 1px solid var(--input-border);
+      background: var(--input-bg);
+      outline: none;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .input-group input:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);
+      background: #fff;
     }
 
     .input-group label {
-      display: block;
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
       font-size: 0.9rem;
-      color: #334155;
-      margin-bottom: 0.4rem;
+      pointer-events: none;
+      transition: all 0.3s ease;
     }
 
-    .input-field,
-    .mobile-input,
-    .country-code,
-    .password-input {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      border: 1px solid #e5e7eb;
-      border-radius: 0.75rem;
-      font-size: 1rem;
-      background: #f9fafb;
-      color: #0f172a;
-    }
-
-    .input-field:focus,
-    .mobile-input:focus,
-    .password-input:focus {
-      outline: none;
-      border-color: #f97316;
-      background: #ffffff;
-    }
-
-    .mobile-group {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .country-code {
-      width: 5.5rem;
-      flex-shrink: 0;
-      text-align: center;
-      background: #f1f5f9;
-    }
-
-    .mobile-input {
-      flex-grow: 1;
+    .input-group input:focus+label,
+    .input-group input:not(:placeholder-shown)+label {
+      top: -0.6rem;
+      left: 0.9rem;
+      font-size: 0.75rem;
+      color: var(--primary-color);
+      background: #fff;
+      padding: 0 0.25rem;
     }
 
     .password-wrapper {
       position: relative;
-    }
-
-    .password-wrapper input {
-      padding-right: 2.5rem;
     }
 
     .password-toggle {
@@ -112,8 +125,131 @@
       right: 1rem;
       transform: translateY(-50%);
       font-size: 1.2rem;
-      color: #475569;
+      color: #64748b;
       cursor: pointer;
+      transition: transform 0.25s ease;
+    }
+
+    .password-toggle:hover {
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    button {
+      width: 100%;
+      background: var(--primary-color);
+      color: #ffffff;
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 1rem;
+    }
+
+    button:disabled {
+      background: #fdba74;
+      cursor: not-allowed;
+    }
+
+    button:hover:not(:disabled) {
+      background: #ea580c;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(249, 115, 22, 0.3);
+    }
+
+    .links {
+      margin-top: 1.2rem;
+      font-size: 0.9rem;
+      color: #64748b;
+      text-align: center;
+    }
+
+    .links a {
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+
+    /* Popup blur effect */
+    .popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(8px);
+      background-color: rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      transition: opacity 0.3s ease;
+    }
+
+    .popup-box {
+      background: var(--popup-bg);
+      backdrop-filter: blur(15px);
+      color: #fff;
+      padding: 1.5rem 2rem;
+      border-radius: 1.5rem;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+      font-weight: 500;
+      font-size: 1.1rem;
+      animation: popIn 0.3s ease;
+    }
+
+    @keyframes popIn {
+      from {
+        transform: scale(0.9);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* Loader */
+    .loader-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 247, 237, 0.9);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .loader-overlay.show {
+      display: flex;
+      opacity: 1;
+    }
+
+    .loader {
+      width: 40px;
+      height: 40px;
+      border: 6px solid #fff;
+      border-top: 6px solid #f97316;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
     }
 
     .match-status {
@@ -129,78 +265,46 @@
     .match-error {
       color: red;
     }
-
-    button {
-      width: 100%;
-      background: #f97316;
-      color: #ffffff;
-      padding: 0.75rem 1rem;
-      border: none;
-      border-radius: 0.75rem;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    button:disabled {
-      background: #fdba74;
-      cursor: not-allowed;
-    }
-
-    button:hover:not(:disabled) {
-      background: #ea580c;
-    }
-
-    .links {
-      margin-top: 1.2rem;
-      font-size: 0.9rem;
-      color: #64748b;
-      text-align: center;
-    }
-
-    .links a {
-      color: #f97316;
-      text-decoration: none;
-    }
   </style>
 </head>
 
 <body>
+  <!-- Popup -->
+  <div class="popup" id="popup">
+    <div class="popup-box" id="popupMessage">
+      <p></p>
+    </div>
+  </div>
+
+  <div class="loader-overlay" id="loaderOverlay">
+    <div class="loader"></div>
+  </div>
+
   <div class="signup-container">
     <h2>Create Your Dab Dab Account</h2>
     <p class="subtitle">Hot deals need hot accounts 🔥</p>
 
     <form id="signupForm">
       <div class="input-group">
+        <input type="text" id="name" placeholder=" " required />
         <label for="name">Full Name</label>
-        <input type="text" id="name" class="input-field" placeholder="Your name" required />
       </div>
 
       <div class="input-group">
+        <input type="tel" id="mobile" placeholder=" " maxlength="10" required />
         <label for="mobile">Mobile Number</label>
-        <div class="mobile-group">
-          <input type="text" id="countryCode" class="country-code" value="+91" readonly disabled />
-          <input type="tel" id="mobile" class="mobile-input" placeholder="10-digit number" maxlength="10"
-            pattern="[0-9]{10}" required />
-        </div>
       </div>
 
-      <div class="input-group">
+      <div class="input-group password-wrapper">
+        <input type="password" id="password" placeholder=" " required />
         <label for="password">Password</label>
-        <div class="password-wrapper">
-          <input type="password" id="password" class="password-input" placeholder="Create password" required />
-          <i class="ri-eye-off-line password-toggle" onclick="togglePassword('password', this)"></i>
-        </div>
+        <i class="ri-eye-off-line password-toggle" onclick="togglePassword('password', this)"></i>
       </div>
 
-      <div class="input-group">
+      <div class="input-group password-wrapper">
+        <input type="password" id="confirmPassword" placeholder=" " required oninput="checkMatch()" />
         <label for="confirmPassword">Confirm Password</label>
-        <div class="password-wrapper">
-          <input type="password" id="confirmPassword" class="password-input" placeholder="Confirm password" required
-            oninput="checkMatch()" />
-          <i class="ri-eye-off-line password-toggle" onclick="togglePassword('confirmPassword', this)"></i>
-        </div>
+        <i class="ri-eye-off-line password-toggle" onclick="togglePassword('confirmPassword', this)"></i>
         <div id="matchMsg" class="match-status"></div>
       </div>
 
@@ -213,6 +317,10 @@
   </div>
 
   <script>
+    const popup = document.getElementById("popup");
+    const popupMessage = document.getElementById("popupMessage");
+    const loaderOverlay = document.getElementById("loaderOverlay");
+
     function togglePassword(id, icon) {
       const input = document.getElementById(id);
       const isHidden = input.type === "password";
@@ -247,7 +355,6 @@
 
     document.getElementById("signupForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-
       const name = document.getElementById("name").value.trim();
       const mobile = document.getElementById("mobile").value.trim();
       const password = document.getElementById("password").value.trim();
@@ -259,26 +366,25 @@
           credentials: "include",
           body: JSON.stringify({ name, mobile, password }),
         });
-
-        let data;
-        try {
-          data = await res.json();
-        } catch {
-          alert("Server returned unexpected response");
-          return;
-        }
-
-        alert(data.message || "Signup response received");
+        const data = await res.json();
+        popupMessage.innerHTML = data.message || "Signup response received";
+        popup.style.display = "flex";
 
         if (data.success) {
-          window.location.href = "signin.html";
+          setTimeout(() => {
+            popup.style.display = "none";
+            loaderOverlay.classList.add("show");
+            window.location.href = "signin.html";
+          }, 2000);
+        } else {
+          popup.addEventListener("click", () => popup.style.display = "none", { once: true });
         }
-      } catch (error) {
-        console.error("Error:", error);
-        alert("Something went wrong! Please try again.");
+      } catch (err) {
+        console.error(err);
+        popupMessage.innerHTML = "❌ Server error, please try again later.";
+        popup.style.display = "flex";
       }
     });
-
   </script>
 </body>
 
