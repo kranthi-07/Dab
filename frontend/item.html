@@ -220,26 +220,29 @@
     /* ===== Toast Notification (Branded Gradient) ===== */
     .toast {
       position: fixed;
+      bottom: 100px;
       left: 50%;
-      transform: translateX(-50%) scale(0.9);
+      transform: translateX(-50%) translateY(30px);
       background: rgba(30, 30, 30, 0.8);
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(12px);
       color: #fff;
-      padding: 12px 24px;
-      border-radius: 25px;
+      padding: 12px 32px;
+      border-radius: 30px;
       font-size: 15px;
+      font-weight: 500;
       white-space: nowrap;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.2);
       opacity: 0;
-      transition: opacity 0.3s ease, transform 0.3s ease;
       z-index: 9999;
+      pointer-events: none;
+      transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
     }
 
     .toast.show {
-      bottom: 60px;
       opacity: 1;
-      transform: translateX(-55%) scale(1);
+      transform: translateX(-50%) translateY(0);
     }
+
 
     .toast i {
       font-size: 1.2rem;
@@ -401,18 +404,25 @@
 
 
   // === Toast Helper (Gradient + Icon Animations) ===
-  function showToast(message, icon = "ri-check-line", type = "cart") {
-    const toast = document.getElementById("toast");
-    const toastMessage = document.getElementById("toastMessage");
+  function showToast(message) {
+  const existingToast = document.querySelector('.toast');
+  if (existingToast) existingToast.remove();
 
-    // reset classes
-    toast.className = "toast " + type;
-    toastMessage.textContent = message;
-    toast.querySelector("i").className = icon;
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  document.body.appendChild(toast);
 
-    toast.classList.add("show");
-    setTimeout(() => toast.classList.remove("show"), 2500);
-  }
+  // Trigger the animation
+  setTimeout(() => toast.classList.add('show'), 10);
+
+  // Hide automatically
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 500);
+  }, 3000);
+}
+
 
 
 
