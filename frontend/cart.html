@@ -72,20 +72,14 @@
       margin-right: 12px;
     }
 
-    .item-details {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-    }
 
-    .item-details h3 {
+    .cart-item h3 {
       font-size: 1.3rem;
       margin: 0 0 4px;
       color: #222;
     }
 
-    .item-details p {
+    .cart-item p {
       font-size: 0.9rem;
       color: #555;
       margin: 0;
@@ -312,8 +306,8 @@
         const itemDiv = document.createElement('div');
         itemDiv.className = 'cart-item';
         itemDiv.innerHTML = `
-          <img src="${item.image || 'Assets/placeholder.png'}" alt="${item.name}">
-          <div class="item-details">
+            <img src="${item.image || 'Assets/placeholder.png'}" alt="${item.name}">
+    
             <div class="name-details">
               <h3>${item.name}</h3>
               <p class="price">₹${price}</p>
@@ -330,7 +324,6 @@
                 <button onclick="updateQty('${item.productId}', ${qty + 1})">+</button>
               </div>
             </div>
-          </div>
         `;
         cartContainer.appendChild(itemDiv);
       });
