@@ -223,9 +223,10 @@
       bottom: 100px;
       left: 50%;
       transform: translateX(-50%) translateY(30px);
-      backdrop-filter: blur(10px);
+      background: rgba(30, 30, 30, 0.8);
+      backdrop-filter: blur(12px);
       color: #fff;
-      padding: 17px 32px;
+      padding: 12px 32px;
       border-radius: 30px;
       font-size: 15px;
       font-weight: 500;
@@ -404,23 +405,26 @@
 
   // === Toast Helper (Gradient + Icon Animations) ===
   function showToast(message) {
-  const existingToast = document.querySelector('.toast');
-  if (existingToast) existingToast.remove();
+    const existingToast = document.querySelector('.toast');
+    if (existingToast) existingToast.remove();
 
-  const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.textContent = message;
-  document.body.appendChild(toast);
+    const toast = document.getElementById("toast");
+    const toastMessage = document.getElementById("toastMessage");
 
-  // Trigger the animation
-  setTimeout(() => toast.classList.add('show'), 10);
+    // reset classes
+    toast.className = "toast " + type;
+    toastMessage.textContent = message;
+    toast.querySelector("i").className = icon;
 
-  // Hide automatically
-  setTimeout(() => {
-    toast.classList.remove('show');
-    setTimeout(() => toast.remove(), 500);
-  }, 3000);
-}
+    // Trigger the animation
+    setTimeout(() => toast.classList.add('show'), 10);
+
+    // Hide automatically
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 500);
+    }, 3000);
+  }
 
 
 
