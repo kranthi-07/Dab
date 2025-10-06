@@ -213,14 +213,10 @@
       color: #fff;
     }
 
-
-
-
-
     /* ===== Toast Notification (Branded Gradient) ===== */
     .toast {
       position: fixed;
-      bottom: 100px;
+      bottom: 140px;
       left: 50%;
       transform: translateX(-50%) translateY(30px);
       background: rgba(30, 30, 30, 0.8);
@@ -236,13 +232,15 @@
       z-index: 9999;
       pointer-events: none;
       transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .toast.show {
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
-
 
     .toast i {
       font-size: 1.2rem;
@@ -287,15 +285,12 @@
   </div>
 
   <div class="item-wrapper">
-
     <div class="top">
       <a onclick="window.location.replace('index.html')" class="back-btn">
         <i class="ri-arrow-left-line"></i> Back
       </a>
-
       <h2>DAB DAB</h2>
     </div>
-
 
     <div class="item-image">
       <img id="itemImage" src="" alt="Item Image">
@@ -317,186 +312,146 @@
       <div class="go-to-cart">
         <a href="cart.html">Go to Cart<i class="ri-arrow-right-line"></i></a>
       </div>
-
-
     </div>
-
-
   </div>
 
-  <div id="toast" class="toast">
-    <i class="ri-check-line"></i>
-    <span id="toastMessage">Item added successfully</span>
-  </div>
+  <script>
+    const pageLoaderEl = document.getElementById('pageLoader');
+    function showPageLoader() { pageLoaderEl.classList.remove('hidden'); }
+    function hidePageLoader() { pageLoaderEl.classList.add('hidden'); }
 
+    const cartBtn = document.getElementById('cartBtn');
+    const favBtn = document.getElementById('favBtn');
 
+    const params = new URLSearchParams(window.location.search);
+    const name = decodeURIComponent(params.get("name") || "");
+    const priceStr = decodeURIComponent(params.get("price") || "₹0");
+    const desc = decodeURIComponent(params.get("desc") || "No description.");
+    const image = decodeURIComponent(params.get("image") || "");
+    const price = parseInt(String(priceStr).replace("₹", "").trim()) || 0;
 
+    document.getElementById("itemName").textContent = name || "Product";
+    document.getElementById("itemPrice").textContent = `₹${price}`;
+    document.getElementById("itemDesc").textContent = desc;
+    document.getElementById("itemImage").src = image || 'Assets/placeholder.png';
+
+    async function getCart() {
+      try {
+        const res = await fetch('https://dab-1.onrender.com/api/cart', { credentials: 'include' });
+        if (!res.ok) return { items: [] };
+        return await res.json();
+      } catch {
+        return { items: [] };
+      }
+    }
+
+    async function getFavorites() {
+      try {
+        const res = await fetch('https://dab-1.onrender.com/api/favorites', { credentials: 'include' });
+        if (!res.ok) return [];
+        const json = await res.json();
+        return json.items || [];
+      } catch {
+        return [];
+      }
+    }
+
+    async function updateButtons() {
+      const pid = name.replace(/\s+/g, "_");
+      const [cartData, favs] = await Promise.all([getCart(), getFavorites()]);
+      const inCart = (cartData.items || []).some(i => i.productId === pid);
+      const inFav = (favs || []).some(i => i.productId === pid);
+
+      if (inCart) {
+        cartBtn.textContent = "Remove";
+        cartBtn.classList.add("remove");
+      } else {
+        cartBtn.textContent = "Add to Cart";
+        cartBtn.classList.remove("remove");
+      }
+      cartBtn.onclick = toggleCart;
+
+      favBtn.textContent = inFav ? "❤ Remove" : "❤ Add to Favorites";
+      favBtn.onclick = toggleFavorite;
+
+      hidePageLoader();
+    }
+
+    // ✅ Fixed Toast Function
+    function showToast(message, icon, type) {
+      const existing = document.querySelector(".toast");
+      if (existing) existing.remove();
+
+      const toast = document.createElement("div");
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<i class="${icon}"></i><span>${message}</span>`;
+      document.body.appendChild(toast);
+
+      setTimeout(() => toast.classList.add("show"), 10);
+      setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 500);
+      }, 3000);
+    }
+
+    async function toggleCart() {
+      showPageLoader();
+      const pid = name.replace(/\s+/g, "_");
+
+      const cartData = await getCart();
+      const exists = (cartData.items || []).some(i => i.productId === pid);
+
+      if (!exists) {
+        await fetch('https://dab-1.onrender.com/api/cart', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: pid, name, price, image, desc, qty: 1 })
+        });
+        showToast("Added to cart 🛒", "ri-shopping-cart-2-line", "cart");
+      } else {
+        await fetch('https://dab-1.onrender.com/api/cart', {
+          method: 'DELETE',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: pid })
+        });
+        showToast("Removed from cart ❌", "ri-close-line", "remove");
+      }
+
+      await updateButtons();
+    }
+
+    async function toggleFavorite() {
+      showPageLoader();
+      const pid = name.replace(/\s+/g, "_");
+
+      const favs = await getFavorites();
+      const inFav = (favs || []).some(i => i.productId === pid);
+
+      if (!inFav) {
+        await fetch('https://dab-1.onrender.com/api/favorites', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: pid, name, price, image, desc })
+        });
+        showToast("Added to favorites ❤️", "ri-heart-fill", "fav");
+      } else {
+        await fetch('https://dab-1.onrender.com/api/favorites', {
+          method: 'DELETE',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: pid })
+        });
+        showToast("Removed from favorites 💔", "ri-heart-line", "remove");
+      }
+
+      await updateButtons();
+    }
+
+    window.addEventListener('load', updateButtons);
+  </script>
 </body>
-<script>
-  const pageLoaderEl = document.getElementById('pageLoader');
-  function showPageLoader() { pageLoaderEl.classList.remove('hidden'); }
-  function hidePageLoader() { pageLoaderEl.classList.add('hidden'); }
-
-  const cartBtn = document.getElementById('cartBtn');
-  const favBtn = document.getElementById('favBtn');
-
-  // product details from URL
-  const params = new URLSearchParams(window.location.search);
-  const name = decodeURIComponent(params.get("name") || "");
-  const priceStr = decodeURIComponent(params.get("price") || "₹0");
-  const desc = decodeURIComponent(params.get("desc") || "No description.");
-  const image = decodeURIComponent(params.get("image") || "");
-  const price = parseInt(String(priceStr).replace("₹", "").trim()) || 0;
-
-  document.getElementById("itemName").textContent = name || "Product";
-  document.getElementById("itemPrice").textContent = `₹${price}`;
-  document.getElementById("itemDesc").textContent = desc;
-  document.getElementById("itemImage").src = image || 'Assets/placeholder.png';
-
-  // === API helpers ===
-  async function getCart() {
-    try {
-      const res = await fetch('https://dab-1.onrender.com/api/cart', { credentials: 'include' });
-      if (!res.ok) return { items: [] };
-      return await res.json();
-    } catch {
-      return { items: [] };
-    }
-  }
-
-  async function getFavorites() {
-    try {
-      const res = await fetch('https://dab-1.onrender.com/api/favorites', { credentials: 'include' });
-      if (!res.ok) return [];
-      const json = await res.json();
-      return json.items || [];
-    } catch {
-      return [];
-    }
-  }
-
-  // === Update buttons ===
-  async function updateButtons() {
-    const pid = name.replace(/\s+/g, "_");
-    const [cartData, favs] = await Promise.all([getCart(), getFavorites()]);
-    const inCart = (cartData.items || []).some(i => i.productId === pid);
-    const inFav = (favs || []).some(i => i.productId === pid);
-
-    // cart button
-    if (inCart) {
-      cartBtn.textContent = "Remove";
-      cartBtn.classList.add("remove");
-    } else {
-      cartBtn.textContent = "Add to Cart";
-      cartBtn.classList.remove("remove");
-    }
-    cartBtn.onclick = toggleCart;
-
-    // fav button
-    favBtn.textContent = inFav ? "❤ Remove" : "❤ Add to Favorites";
-    favBtn.onclick = toggleFavorite;
-
-    hidePageLoader(); // hide only after buttons ready
-  }
-
-
-
-
-
-  // === Toast Helper (Gradient + Icon Animations) ===
-  function showToast(message) {
-    const existingToast = document.querySelector('.toast');
-    if (existingToast) existingToast.remove();
-
-    const toast = document.getElementById("toast");
-    const toastMessage = document.getElementById("toastMessage");
-
-    // reset classes
-    toast.className = "toast " + type;
-    toastMessage.textContent = message;
-    toast.querySelector("i").className = icon;
-
-    // Trigger the animation
-    setTimeout(() => toast.classList.add('show'), 10);
-
-    // Hide automatically
-    setTimeout(() => {
-      toast.classList.remove('show');
-      setTimeout(() => toast.remove(), 500);
-    }, 3000);
-  }
-
-
-
-
-
-  // === Toggle Cart ===
-  async function toggleCart() {
-    showPageLoader();
-    const pid = name.replace(/\s+/g, "_");
-
-    const cartData = await getCart();
-    const exists = (cartData.items || []).some(i => i.productId === pid);
-
-    if (!exists) {
-      await fetch('https://dab-1.onrender.com/api/cart', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId: pid, name, price, image, desc, qty: 1 })
-      });
-      showToast("Added to cart 🛒", "ri-shopping-cart-2-line", "cart");
-    } else {
-      await fetch('https://dab-1.onrender.com/api/cart', {
-        method: 'DELETE',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId: pid })
-      });
-      showToast("Removed from cart ❌", "ri-close-line", "remove");
-    }
-
-
-    await updateButtons();
-  }
-
-
-
-
-  // === Toggle Favorite ===
-  async function toggleFavorite() {
-    showPageLoader();
-    const pid = name.replace(/\s+/g, "_");
-
-    const favs = await getFavorites();
-    const inFav = (favs || []).some(i => i.productId === pid);
-
-    if (!inFav) {
-      await fetch('https://dab-1.onrender.com/api/favorites', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId: pid, name, price, image, desc })
-      });
-      showToast("Added to favorites ❤️", "ri-heart-fill", "fav");
-    } else {
-      await fetch('https://dab-1.onrender.com/api/favorites', {
-        method: 'DELETE',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId: pid })
-      });
-      showToast("Removed from favorites 💔", "ri-heart-line", "remove");
-    }
-
-
-
-
-    await updateButtons();
-  }
-
-  // === Init ===
-  window.addEventListener('load', updateButtons);
-</script>
 
 </html>
