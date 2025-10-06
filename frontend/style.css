@@ -102,7 +102,7 @@ body {
 }
 
 .btn-login {
-    background: #00b36b;
+    background: var(--primary);
     color: white;
 }
 

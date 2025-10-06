@@ -9,7 +9,6 @@
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 
   <style>
-
     :root {
       --primary-color: #f97316;
     }
@@ -81,9 +80,25 @@
       justify-content: space-between;
     }
 
+    .top .back-btn {
+      text-align: center;
+      display: block;
+      margin-left: 20px;
+      background-color: var(--primary-color);
+      text-decoration: none;
+      padding: 5px;
+      border-radius: 7px;
+      color: #fff;
+    }
+
+    .back-btn:hover {
+      color: #000;
+    }
+
     .top h2 {
-      font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: var(--primary-color);
+      margin-right: 20px;
     }
 
     .item-image {
@@ -198,19 +213,69 @@
       color: #fff;
     }
 
-    .back-btn {
-      text-align: center;
-      display: block;
-      margin-left: 20px;
-      background-color: var(--primary-color);
-      text-decoration: none;
-      padding: 5px;
-      border-radius: 7px;
+
+
+
+
+    /* ===== Toast Notification (Branded Gradient) ===== */
+    .toast {
+      position: fixed;
+      bottom: -80px;
+      left: 50%;
+      transform: translateX(-50%) scale(0.95);
       color: #fff;
+      padding: 1rem 1.5rem;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.25);
+      opacity: 0;
+      transition: all 0.4s ease;
+      z-index: 2000;
+      backdrop-filter: blur(8px);
     }
 
-    .back-btn:hover {
-      color: #000;
+    .toast.show {
+      bottom: 30px;
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
+
+    .toast i {
+      font-size: 1.2rem;
+      animation: pop 0.4s ease;
+    }
+
+    @keyframes pop {
+      0% {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+
+      60% {
+        transform: scale(1.15);
+        opacity: 1;
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    /* Gradient variants */
+    .toast.cart {
+      background: linear-gradient(135deg, #ff8a00, #ff4b2b);
+    }
+
+    .toast.fav {
+      background: linear-gradient(135deg, #ff6f91, #ff9671);
+    }
+
+    .toast.remove {
+      background: linear-gradient(135deg, #6b7280, #9ca3af);
     }
   </style>
 </head>
@@ -255,134 +320,173 @@
 
 
     </div>
+
+
   </div>
 
-  <script>
-    const pageLoaderEl = document.getElementById('pageLoader');
-    function showPageLoader() { pageLoaderEl.classList.remove('hidden'); }
-    function hidePageLoader() { pageLoaderEl.classList.add('hidden'); }
+  <div id="toast" class="toast">
+    <i class="ri-check-line"></i>
+    <span id="toastMessage">Item added successfully</span>
+  </div>
 
-    const cartBtn = document.getElementById('cartBtn');
-    const favBtn = document.getElementById('favBtn');
 
-    // product details from URL
-    const params = new URLSearchParams(window.location.search);
-    const name = decodeURIComponent(params.get("name") || "");
-    const priceStr = decodeURIComponent(params.get("price") || "₹0");
-    const desc = decodeURIComponent(params.get("desc") || "No description.");
-    const image = decodeURIComponent(params.get("image") || "");
-    const price = parseInt(String(priceStr).replace("₹", "").trim()) || 0;
 
-    document.getElementById("itemName").textContent = name || "Product";
-    document.getElementById("itemPrice").textContent = `₹${price}`;
-    document.getElementById("itemDesc").textContent = desc;
-    document.getElementById("itemImage").src = image || 'Assets/placeholder.png';
-
-    // === API helpers ===
-    async function getCart() {
-      try {
-        const res = await fetch('https://dab-1.onrender.com/api/cart', { credentials: 'include' });
-        if (!res.ok) return { items: [] };
-        return await res.json();
-      } catch {
-        return { items: [] };
-      }
-    }
-
-    async function getFavorites() {
-      try {
-        const res = await fetch('https://dab-1.onrender.com/api/favorites', { credentials: 'include' });
-        if (!res.ok) return [];
-        const json = await res.json();
-        return json.items || [];
-      } catch {
-        return [];
-      }
-    }
-
-    // === Update buttons ===
-    async function updateButtons() {
-      const pid = name.replace(/\s+/g, "_");
-      const [cartData, favs] = await Promise.all([getCart(), getFavorites()]);
-      const inCart = (cartData.items || []).some(i => i.productId === pid);
-      const inFav = (favs || []).some(i => i.productId === pid);
-
-      // cart button
-      if (inCart) {
-        cartBtn.textContent = "Remove";
-        cartBtn.classList.add("remove");
-      } else {
-        cartBtn.textContent = "Add to Cart";
-        cartBtn.classList.remove("remove");
-      }
-      cartBtn.onclick = toggleCart;
-
-      // fav button
-      favBtn.textContent = inFav ? "❤ Remove" : "❤ Add to Favorites";
-      favBtn.onclick = toggleFavorite;
-
-      hidePageLoader(); // hide only after buttons ready
-    }
-
-    // === Toggle Cart ===
-    async function toggleCart() {
-      showPageLoader();
-      const pid = name.replace(/\s+/g, "_");
-
-      const cartData = await getCart();
-      const exists = (cartData.items || []).some(i => i.productId === pid);
-
-      if (!exists) {
-        // add
-        await fetch('https://dab-1.onrender.com/api/cart', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productId: pid, name, price, image, desc, qty: 1 })
-        });
-      } else {
-        // remove
-        await fetch('https://dab-1.onrender.com/api/cart', {
-          method: 'DELETE',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productId: pid })
-        });
-      }
-
-      await updateButtons();
-    }
-
-    // === Toggle Favorite ===
-    async function toggleFavorite() {
-      showPageLoader();
-      const pid = name.replace(/\s+/g, "_");
-
-      const favs = await getFavorites();
-      const inFav = (favs || []).some(i => i.productId === pid);
-
-      if (!inFav) {
-        await fetch('https://dab-1.onrender.com/api/favorites', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productId: pid, name, price, image, desc })
-        });
-      } else {
-        await fetch('https://dab-1.onrender.com/api/favorites', {
-          method: 'DELETE',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productId: pid })
-        });
-      }
-
-      await updateButtons();
-    }
-
-    // === Init ===
-    window.addEventListener('load', updateButtons);
-  </script>
 </body>
+<script>
+  const pageLoaderEl = document.getElementById('pageLoader');
+  function showPageLoader() { pageLoaderEl.classList.remove('hidden'); }
+  function hidePageLoader() { pageLoaderEl.classList.add('hidden'); }
+
+  const cartBtn = document.getElementById('cartBtn');
+  const favBtn = document.getElementById('favBtn');
+
+  // product details from URL
+  const params = new URLSearchParams(window.location.search);
+  const name = decodeURIComponent(params.get("name") || "");
+  const priceStr = decodeURIComponent(params.get("price") || "₹0");
+  const desc = decodeURIComponent(params.get("desc") || "No description.");
+  const image = decodeURIComponent(params.get("image") || "");
+  const price = parseInt(String(priceStr).replace("₹", "").trim()) || 0;
+
+  document.getElementById("itemName").textContent = name || "Product";
+  document.getElementById("itemPrice").textContent = `₹${price}`;
+  document.getElementById("itemDesc").textContent = desc;
+  document.getElementById("itemImage").src = image || 'Assets/placeholder.png';
+
+  // === API helpers ===
+  async function getCart() {
+    try {
+      const res = await fetch('https://dab-1.onrender.com/api/cart', { credentials: 'include' });
+      if (!res.ok) return { items: [] };
+      return await res.json();
+    } catch {
+      return { items: [] };
+    }
+  }
+
+  async function getFavorites() {
+    try {
+      const res = await fetch('https://dab-1.onrender.com/api/favorites', { credentials: 'include' });
+      if (!res.ok) return [];
+      const json = await res.json();
+      return json.items || [];
+    } catch {
+      return [];
+    }
+  }
+
+  // === Update buttons ===
+  async function updateButtons() {
+    const pid = name.replace(/\s+/g, "_");
+    const [cartData, favs] = await Promise.all([getCart(), getFavorites()]);
+    const inCart = (cartData.items || []).some(i => i.productId === pid);
+    const inFav = (favs || []).some(i => i.productId === pid);
+
+    // cart button
+    if (inCart) {
+      cartBtn.textContent = "Remove";
+      cartBtn.classList.add("remove");
+    } else {
+      cartBtn.textContent = "Add to Cart";
+      cartBtn.classList.remove("remove");
+    }
+    cartBtn.onclick = toggleCart;
+
+    // fav button
+    favBtn.textContent = inFav ? "❤ Remove" : "❤ Add to Favorites";
+    favBtn.onclick = toggleFavorite;
+
+    hidePageLoader(); // hide only after buttons ready
+  }
+
+
+
+
+
+  // === Toast Helper (Gradient + Icon Animations) ===
+  function showToast(message, icon = "ri-check-line", type = "cart") {
+    const toast = document.getElementById("toast");
+    const toastMessage = document.getElementById("toastMessage");
+
+    // reset classes
+    toast.className = "toast " + type;
+    toastMessage.textContent = message;
+    toast.querySelector("i").className = icon;
+
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2500);
+  }
+
+
+
+
+  // === Toggle Cart ===
+  async function toggleCart() {
+    showPageLoader();
+    const pid = name.replace(/\s+/g, "_");
+
+    const cartData = await getCart();
+    const exists = (cartData.items || []).some(i => i.productId === pid);
+
+    if (!exists) {
+      await fetch('https://dab-1.onrender.com/api/cart', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: pid, name, price, image, desc, qty: 1 })
+      });
+      showToast("Added to cart 🛒", "ri-shopping-cart-2-line", "cart");
+    } else {
+      await fetch('https://dab-1.onrender.com/api/cart', {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: pid })
+      });
+      showToast("Removed from cart ❌", "ri-close-line", "remove");
+    }
+
+
+    await updateButtons();
+  }
+
+
+
+
+  // === Toggle Favorite ===
+  async function toggleFavorite() {
+    showPageLoader();
+    const pid = name.replace(/\s+/g, "_");
+
+    const favs = await getFavorites();
+    const inFav = (favs || []).some(i => i.productId === pid);
+
+    if (!inFav) {
+      await fetch('https://dab-1.onrender.com/api/favorites', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: pid, name, price, image, desc })
+      });
+      showToast("Added to favorites ❤️", "ri-heart-fill", "fav");
+    } else {
+      await fetch('https://dab-1.onrender.com/api/favorites', {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: pid })
+      });
+      showToast("Removed from favorites 💔", "ri-heart-line", "remove");
+    }
+
+
+
+
+    await updateButtons();
+  }
+
+  // === Init ===
+  window.addEventListener('load', updateButtons);
+</script>
 
 </html>
