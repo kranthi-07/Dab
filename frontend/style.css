@@ -112,7 +112,7 @@ body {
 }
 
 .btn-login:hover {
-    background: #009e5e;
+    background: #ff862a;
 }
 
 .btn-cancel:hover {
@@ -571,51 +571,60 @@ nav .signin {
 
 
 .template {
-    display: flex;
-    width: 100%;
-    align-items: center;
     background: linear-gradient(to bottom, #f97316, #f97316, #f87d25, #fda03c, #fac98c, #fff7ed);
-    justify-content: space-between;
-    padding: 130px 30px 40px 30px;
+    width:100%;
+    height:100vh;
+    position: absolute;
+    top:0;
+    z-index: -1;
+    
 }
 
 .template-text {
     font-family: "poppins", sans-serif;
+    background: linear-gradient(to bottom right, #ff9447, #ff984f, #ffac54, #fac98c, #fff7ed);
     z-index: 10;
+    display: flex;
     max-width: 100%;
+    margin:90px 15px 15px 15px;
+    width: auto;
+    height:200px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.119);
+    border-radius: 15px;
 }
 
 .template-text h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    max-width: 80%;
-    margin-bottom: 10px;
+    font-size: 2.2rem;
+    max-height: fit-content;
+    font-weight: 700;   
+    color:#fff;
+    max-width: 85%;
+    padding:20px;
+    /* background-color: rgba(211, 211, 211, 0.37); */
+    /* backdrop-filter: blur(5px); */
+    z-index: 2;
 }
 
-.template-img {
+.template-text p{
+    position: absolute;
+    bottom:0;
+    color:#060606;
+    margin-bottom: 45px;
+    z-index: 1;
+    font-size: .9rem;
+}
+
+.template-text img {
     position: absolute;
     right: 0;
-    max-width: 55%;
-}
-
-.template-img img {
-    transform: rotateX(30deg);
-    /* width:220px; */
+    transform: rotateX(30deg) translateY(-130px);
+    width:200px;
     max-width: 100%;
-    height: auto;
-    display: block;
 }
 
-.template-text p {
-    font-size: 1rem;
-    margin-bottom: 20px;
-    max-width: 65%;
-    color: white;
-}
 
-.template-text .tagline {
-    color: rgb(56, 56, 56);
-}
 
 .order-btn {
     font-family: "Lora", sans-serif;
@@ -624,20 +633,30 @@ nav .signin {
     border: none;
     padding: 10px 15px;
     border-radius: 8px;
-    max-width: 40%;
-    font-size: .7rem;
+    max-width: 50%;
+    margin:15px;
+    font-size: .8rem;
     cursor: pointer;
+    position: absolute;
+    bottom:0;
+    right:0;
+    z-index: 3;
 }
 
-.tagline {
-    margin-top: 10px;
-    color: #374151;
-}
+
+
+
+
+
+
+
+
 
 
 .popular-section {
     padding: 20px;
-    background-color: #fff7ed;
+    margin-top: 270px;
+    z-index: 10;
 }
 
 .popular-section h2 {
