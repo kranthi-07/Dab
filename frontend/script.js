@@ -72,8 +72,21 @@ function openView(viewId) {
   if (view) {
     view.classList.add("active");
     overlay.classList.add("active");
+
+    // 🩵 Show loader immediately when Favorites is opened
+    if (viewId === "favoritesView") {
+      favSection.innerHTML = `
+        <div class="fav-loader">
+          <div class="fav-spinner"></div>
+          <p style="text-align:center;margin-top:10px;color:#999;">Loading favorites...</p>
+        </div>
+      `;
+      // Fetch and render after small delay to ensure smooth transition
+      setTimeout(() => renderFavoritesMenu(), 400);
+    }
   }
 }
+
 
 function goBack(viewId) {
   const view = document.getElementById(viewId);
