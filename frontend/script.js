@@ -237,9 +237,7 @@ async function isLoggedIn() {
     return false;
   }
 }
-
 async function fetchFavorites() {
-  if (!await isLoggedIn()) return [];
   try {
     const res = await fetch('https://dab-1.onrender.com/api/favorites', { credentials: 'include' });
     if (!res.ok) return [];
@@ -250,62 +248,73 @@ async function fetchFavorites() {
     return [];
   }
 }
+
 async function renderFavoritesMenu() {
-  if (!favSection) return;
+  const favContainer = document.getElementById('favoritesContent');
+  if (!favContainer) return;
 
-  // Show loader while fetching
-  favSection.innerHTML = `
-    <div class="fav-loader">
-      <div class="fav-spinner"></div>
-    </div>
-  `;
+  favContainer.innerHTML = `<div class="fav-loader"><div></div></div>`;
 
-  const favorites = await fetchFavorites();
-
-  // Clear loader after fetch
-  favSection.innerHTML = '';
-
-  if (favorites.length === 0) {
-    favSection.innerHTML = "<p>You haven’t favorited any items yet.</p>";
+  const loggedIn = await isLoggedIn();
+  if (!loggedIn) {
+    favContainer.innerHTML = `<div class="empty-message fade-in">Please login to view your favorites.</div>`;
     return;
   }
 
-  favorites.forEach(item => {
-    const div = document.createElement('div');
-    div.className = "fav-item";
-    div.style.display = "flex";
-    div.style.alignItems = "center";
-    div.style.justifyContent = "space-between";
-    div.style.marginBottom = "10px";
-    div.style.borderBottom = "1px solid #eee";
-    div.style.paddingBottom = "5px";
+  try {
+    const favorites = await fetchFavorites();
+    favContainer.innerHTML = '';
 
-    div.innerHTML = `
-      <div style="display:flex; align-items:center; cursor:pointer;">
-        <img src="${item.image}" alt="${item.name}" style="width:50px;height:50px;border-radius:8px;margin-right:10px;">
-        <span>${item.name}</span>
-      </div>
-      <button style="background:#ff5722; color:#fff; border:none; border-radius:5px; padding:5px 8px; cursor:pointer;">Remove</button>
-    `;
+    if (!favorites.length) {
+      favContainer.innerHTML = `<div class="empty-message fade-in">You haven’t favorited any items yet.</div>`;
+      return;
+    }
 
-    div.children[0].onclick = () => goToItem(item.name);
+    favorites.forEach((item, i) => {
+      const div = document.createElement('div');
+      div.className = "fav-item fade-in";
+      div.style.animationDelay = `${i * 0.05}s`;
+      div.style.cssText = `
+        display:flex;align-items:center;justify-content:space-between;
+        margin-bottom:10px;border-bottom:1px solid #eee;padding-bottom:8px;
+      `;
 
-    div.children[1].onclick = async () => {
-      if (!await isLoggedIn()) {
-        alert("Login first!");
-        return;
-      }
-      await fetch('https://dab-1.onrender.com/api/favorites', {
-        method: 'DELETE',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId: item.productId })
-      });
-      renderFavoritesMenu();
-    };
+      div.innerHTML = `
+        <div style="display:flex;align-items:center;cursor:pointer;">
+          <img src="${item.image}" alt="${item.name}" style="width:50px;height:50px;border-radius:8px;margin-right:10px;">
+          <span>${item.name}</span>
+        </div>
+        <button style="background:#ef4444;color:#fff;border:none;border-radius:5px;padding:5px 8px;cursor:pointer;">Remove</button>
+      `;
 
-    favSection.appendChild(div);
-  });
+      div.children[0].onclick = () => goToItem(item.name);
+
+      div.children[1].onclick = async () => {
+        await fetch('https://dab-1.onrender.com/api/favorites', {
+          method: 'DELETE',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: item.productId })
+        });
+        renderFavoritesMenu();
+      };
+
+      favContainer.appendChild(div);
+    });
+  } catch (err) {
+    favContainer.innerHTML = `<div class="empty-message fade-in">Failed to load favorites. Please try again later.</div>`;
+  }
+}
+
+// --- Trigger fade-in when sidebar opens ---
+function openView(viewId) {
+  closeAllViews();
+  const view = document.getElementById(viewId);
+  if (view) {
+    view.classList.add("active", "fade-in");
+    overlay.classList.add("active");
+    if (viewId === "favoritesView") renderFavoritesMenu();
+  }
 }
 
 

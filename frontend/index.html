@@ -23,72 +23,61 @@
         <p onclick="openView('contactView')">📞&ensp;Contact</p>
         <p onclick="openView('logoutView')">🚪&ensp;Logout</p>
     </div>
+
+
     <div class="content-view" id="profileView">
-
-        <section id="profile" style="padding:20px;">
-
-            <div class="back-button" onclick="goBack('profileView')">
-                <i class="ri-arrow-left-s-line"></i>
-                <p>Back</p>
+        <div class="back-button" onclick="goBack('profileView')">
+            <i class="ri-arrow-left-s-line"></i>
+            <p>Back</p>
+        </div>
+        <h2 style="text-align:center;margin:20px 0;">My Profile</h2>
+        <div id="profileCard"
+            style="background:#ff6f0020;backdrop-filter: blur(5px); border-radius:10px; box-shadow:0 2px 15px rgba(0,0,0,0.1); padding:20px;">
+            <div id="userAvatar"
+                style="width:100px; height:100px; border-radius:50%; margin:0 auto 15px; display:flex; align-items:center; justify-content:center; font-size:40px; font-weight:bold; color:#fff; background:#f97316;">
             </div>
-            <h2 style="margin-bottom:20px;margin-top:20px; color:#ea580c;text-align:center;">My Profile</h2>
-
-
-
-
-            <div id="profileCard" style="background:#ff6f0020;backdrop-filter: blur(5px); border-radius:10px; box-shadow:0 2px 15px rgba(0,0,0,0.1); padding:20px; width:100%; ">
-
-                <!-- ✅ Avatar with first letter -->
-                <div id="userAvatar" style="width:100px; height:100px; border-radius:50%; margin:0 auto 15px; display:flex; align-items:center; justify-content:center; font-size:40px; font-weight:bold; color:#fff; background:#ea580c;">
-                </div>
-
-                <p style="margin:10px 0;"><strong>Name:</strong> <span id="userName">Loading...</span></p>
-                <p style="margin:10px 0;"><strong>Mobile:</strong> <span id="userMobile">Loading...</span></p>
-                <p style="margin:10px 0;"><strong>Address:</strong> <span id="userAddress">Loading...</span></p>
-
-            </div>
-        </section>
-
-
+            <p><strong>Name:</strong> <span id="userName">Loading...</span></p>
+            <p><strong>Mobile:</strong> <span id="userMobile">Loading...</span></p>
+            <p><strong>Address:</strong> <span id="userAddress">Loading...</span></p>
+        </div>
     </div>
 
-
-
+    <!-- ORDERS -->
     <div class="content-view" id="ordersView">
         <div class="back-button" onclick="goBack('ordersView')"><i class="ri-arrow-left-s-line"></i>
             <p>Back</p>
         </div>
         <h3>Orders</h3>
-        <div class="content-body">No orders placed yet.</div>
+        <div class="content-body empty-message">No orders placed yet.</div>
     </div>
 
-
-
+    <!-- FAVORITES -->
     <div class="content-view" id="favoritesView">
         <div class="back-button" onclick="goBack('favoritesView')"><i class="ri-arrow-left-s-line"></i>
             <p>Back</p>
         </div>
         <h3>Favorites</h3>
-        <div class="content-body">You haven’t favorited any items yet.</div>
+        <div class="content-body" id="favoritesContent">
+            <div class="fav-loader">
+                <div></div>
+            </div>
+        </div>
     </div>
 
-
-
+    <!-- CONTACT -->
     <div class="content-view" id="contactView">
         <div class="back-button" onclick="goBack('contactView')"><i class="ri-arrow-left-s-line"></i>
             <p>Back</p>
         </div>
         <h3>Contact Us</h3>
-        <div class="content-body">Reach us at support@dabdab.com</div>
+        <div class="content-body empty-message">Reach us at support@dabdab.com</div>
     </div>
 
-
-
+    <!-- LOGOUT -->
     <div class="content-view" id="logoutView">
         <div class="back-button" onclick="goBack('logoutView')"><i class="ri-arrow-left-s-line"></i>
             <p>Back</p>
         </div>
-
         <h3>Confirm Logout</h3>
         <div class="content-body">
             <p>Are you sure you want to logout?</p>
@@ -96,27 +85,17 @@
         </div>
     </div>
 
-
-
-
+    <!-- HEADER -->
     <header>
         <div class="main-section">
             <a class="menu" id="menuBtn"><i class='bx bx-menu'></i></a>
             <a class="logo"><img src="Assets/dabdab.jpg" alt=""></a>
         </div>
-
         <nav>
             <i class="ri-search-line search" onclick="toggleSearch()"></i>
-
-
             <a href="signin.html" class="user" id="userHeader">
                 <i class='bx bx-user' id="defaultUserIcon"></i>
             </a>
-
-
-            <div id="loader" class="loader" style="display:none;"></div>
-
-
             <a href="cart.html" class="cart"><i class='bx bx-cart'></i></a>
         </nav>
     </header>
@@ -124,15 +103,9 @@
     <section class="template" id="bodyContent">
         <div class="template-text">
             <h1>Delicious South Indian Snacks</h1>
-            <!-- <p>Crispy, Spicy & Authentic Straight from South India to your plate.</p> -->
             <button class="order-btn" onclick="goToOrder()">🔥 ORDER NOW</button>
             <img src="Assets/Punugulu-half.png" alt="South Indian Snacks" />
-            <!-- <p>Crispy, Spicy & Authentic Straight from South India to your plate.</p>
-            
-            <p class="tagline">Freshly made. Delivered fast.</p> -->
         </div>
-         
-        
     </section>
 
 
