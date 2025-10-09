@@ -250,12 +250,21 @@ async function fetchFavorites() {
     return [];
   }
 }
-
 async function renderFavoritesMenu() {
-  const favorites = await fetchFavorites();
   if (!favSection) return;
 
+  // Show loader while fetching
+  favSection.innerHTML = `
+    <div class="fav-loader">
+      <div class="fav-spinner"></div>
+    </div>
+  `;
+
+  const favorites = await fetchFavorites();
+
+  // Clear loader after fetch
   favSection.innerHTML = '';
+
   if (favorites.length === 0) {
     favSection.innerHTML = "<p>You haven’t favorited any items yet.</p>";
     return;
@@ -279,12 +288,13 @@ async function renderFavoritesMenu() {
       <button style="background:#ff5722; color:#fff; border:none; border-radius:5px; padding:5px 8px; cursor:pointer;">Remove</button>
     `;
 
-    // Navigate to item page
     div.children[0].onclick = () => goToItem(item.name);
 
-    // Remove favorite
     div.children[1].onclick = async () => {
-      if (!await isLoggedIn()) { alert("Login first!"); return; }
+      if (!await isLoggedIn()) {
+        alert("Login first!");
+        return;
+      }
       await fetch('https://dab-1.onrender.com/api/favorites', {
         method: 'DELETE',
         credentials: 'include',
@@ -297,6 +307,7 @@ async function renderFavoritesMenu() {
     favSection.appendChild(div);
   });
 }
+
 
 // Favorite button in item.html
 async function updateFavButton(name, productId, price, image, desc, favBtn) {
